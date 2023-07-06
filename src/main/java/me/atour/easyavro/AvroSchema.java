@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,11 +44,12 @@ public class AvroSchema<T> {
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
+      UnaryOperator<String> fieldNameConverter = this::toSnakeCase;
       for (Field field : nonStaticValidFields) {
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
         String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
-        String processedFieldName = toSnakeCase(originalFieldName);
+        String processedFieldName = fieldNameConverter.apply(originalFieldName);
         if (String.class.isAssignableFrom(fieldType)) {
           schemaBuilder = schemaBuilder.requiredString(processedFieldName);
         } else if (long.class.isAssignableFrom(fieldType)) {
