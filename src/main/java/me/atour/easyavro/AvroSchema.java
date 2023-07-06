@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.atour.easyavro.fieldnaming.DromedaryCaseNamingConverter;
+import me.atour.easyavro.fieldnaming.FieldNamingConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -43,11 +44,14 @@ public class AvroSchema<T> {
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
+      AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
+      FieldNamingConverter fieldNameConverter = namingAnnotation != null ?
+          FieldNamingConverter.of(namingAnnotation.strategy()) : new DromedaryCaseNamingConverter();
       for (Field field : nonStaticValidFields) {
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
         String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
-        String processedFieldName = toSnakeCase(originalFieldName);
+        String processedFieldName = fieldNameConverter.convert(originalFieldName);
         if (String.class.isAssignableFrom(fieldType)) {
           schemaBuilder = schemaBuilder.requiredString(processedFieldName);
         } else if (long.class.isAssignableFrom(fieldType)) {
@@ -89,14 +93,5 @@ public class AvroSchema<T> {
       log.error("Could not convert to Avro record {}.", e.getMessage());
     }
     return record;
-  }
-
-  public String toSnakeCase(@NonNull String name) {
-    String followedByCapitalized = "([a-z0-9])([A-Z]+)";
-    String followedByDigit = "([a-zA-Z])([0-9]+)";
-    String replacement = "$1_$2";
-    return name.replaceAll(followedByCapitalized, replacement)
-        .replaceAll(followedByDigit, replacement)
-        .toLowerCase();
   }
 }
