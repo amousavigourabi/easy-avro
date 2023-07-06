@@ -32,7 +32,8 @@ public class AvroSchema<T> {
   public void generate() {
     schemaFields.clear();
     Field[] fields = clazz.getDeclaredFields();
-    SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder.record(clazz.getName()).fields();
+    SchemaBuilder.FieldAssembler<Schema> schemaBuilder =
+        SchemaBuilder.record(clazz.getName()).namespace(clazz.getPackageName()).fields();
     try {
       List<Field> nonStaticValidFields = new ArrayList<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
