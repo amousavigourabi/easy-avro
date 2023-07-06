@@ -23,6 +23,9 @@ import org.apache.avro.generic.GenericRecord;
 @RequiredArgsConstructor
 public class AvroSchema<T> {
 
+  String followedByCapitalized = "([a-z0-9])([A-Z]+)";
+  String followedByDigit = "([a-zA-Z])([0-9]+)";
+
   private final Class<T> clazz;
   private final Map<String, String> schemaFields = new HashMap<>();
 
@@ -94,11 +97,38 @@ public class AvroSchema<T> {
   }
 
   public String toSnakeCase(@NonNull String name) {
-    String followedByCapitalized = "([a-z0-9])([A-Z]+)";
-    String followedByDigit = "([a-zA-Z])([0-9]+)";
     String replacement = "$1_$2";
     return name.replaceAll(followedByCapitalized, replacement)
         .replaceAll(followedByDigit, replacement)
         .toLowerCase();
+  }
+
+  public String toKebabCase(@NonNull String name) {
+    String replacement = "$1-$2";
+    return name.replaceAll(followedByCapitalized, replacement)
+        .replaceAll(followedByDigit, replacement)
+        .toLowerCase();
+  }
+
+  public String toScreamingSnakeCase(@NonNull String name) {
+    String replacement = "$1-$2";
+    return name.replaceAll(followedByCapitalized, replacement)
+        .replaceAll(followedByDigit, replacement)
+        .toUpperCase();
+  }
+
+  public String toLowerCase(@NonNull String name) {
+    return name.toLowerCase();
+  }
+
+  public String toUpperCase(@NonNull String name) {
+    return name.toUpperCase();
+  }
+
+  public String toPascalCase(@NonNull String name) {
+    if (name.length() < 1) {
+      throw new IllegalArgumentException();
+    }
+    return name.substring(0, 1).toUpperCase() + name.substring(1);
   }
 }
