@@ -134,6 +134,7 @@ public class AvroSchema<T> {
    * @param fieldName the field name
    * @param schemaBuilder the {@link SchemaBuilder.FieldAssembler} to add the field to
    * @return the {@link SchemaBuilder.FieldAssembler} with the field added
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
   public SchemaBuilder.FieldAssembler<Schema> setField(Class<?> fieldType, String fieldName,
                                                        @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder) throws IllegalAccessException {
@@ -154,7 +155,7 @@ public class AvroSchema<T> {
       builder = builder.requiredFloat(fieldName);
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
-      throw new IllegalAccessException(fieldType.toString());
+      throw new CannotCreateValidEncodingException();
     }
     return builder;
   }
