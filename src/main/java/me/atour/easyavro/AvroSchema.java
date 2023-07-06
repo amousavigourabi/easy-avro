@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.UnaryOperator;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.atour.easyavro.fieldnaming.DromedaryCaseNamingConverter;
+import me.atour.easyavro.fieldnaming.FieldNamingConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -22,9 +22,6 @@ import org.apache.avro.generic.GenericRecord;
 @Slf4j
 @RequiredArgsConstructor
 public class AvroSchema<T> {
-
-  String followedByCapitalized = "([a-z0-9])([A-Z]+)";
-  String followedByDigit = "([a-zA-Z])([0-9]+)";
 
   private final Class<T> clazz;
   private final Map<String, String> schemaFields = new HashMap<>();
@@ -48,40 +45,13 @@ public class AvroSchema<T> {
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
       AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
-      UnaryOperator<String> fieldNameConverter;
-      if (namingAnnotation != null) {
-        switch (namingAnnotation.strategy()) {
-          case SCREAMING_SNAKE_CASE:
-            fieldNameConverter = this::toScreamingSnakeCase;
-            break;
-          case KEBAB_CASE:
-            fieldNameConverter = this::toKebabCase;
-            break;
-          case LOWERCASE:
-            fieldNameConverter = this::toLowerCase;
-            break;
-          case UPPERCASE:
-            fieldNameConverter = this::toUpperCase;
-            break;
-          case PASCAL_CASE:
-            fieldNameConverter = this::toPascalCase;
-            break;
-          case SNAKE_CASE:
-            fieldNameConverter = this::toSnakeCase;
-            break;
-          case DROMEDARY_CASE:
-          default:
-            fieldNameConverter = this::toDromedaryCase;
-            break;
-        }
-      } else {
-        fieldNameConverter = this::toDromedaryCase;
-      }
+      FieldNamingConverter fieldNameConverter = namingAnnotation != null ?
+          FieldNamingConverter.of(namingAnnotation.strategy()) : new DromedaryCaseNamingConverter();
       for (Field field : nonStaticValidFields) {
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
         String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
-        String processedFieldName = fieldNameConverter.apply(originalFieldName);
+        String processedFieldName = fieldNameConverter.convert(originalFieldName);
         if (String.class.isAssignableFrom(fieldType)) {
           schemaBuilder = schemaBuilder.requiredString(processedFieldName);
         } else if (long.class.isAssignableFrom(fieldType)) {
@@ -123,45 +93,5 @@ public class AvroSchema<T> {
       log.error("Could not convert to Avro record {}.", e.getMessage());
     }
     return record;
-  }
-
-  public String toSnakeCase(@NonNull String name) {
-    String replacement = "$1_$2";
-    return name.replaceAll(followedByCapitalized, replacement)
-        .replaceAll(followedByDigit, replacement)
-        .toLowerCase();
-  }
-
-  public String toKebabCase(@NonNull String name) {
-    String replacement = "$1-$2";
-    return name.replaceAll(followedByCapitalized, replacement)
-        .replaceAll(followedByDigit, replacement)
-        .toLowerCase();
-  }
-
-  public String toScreamingSnakeCase(@NonNull String name) {
-    String replacement = "$1-$2";
-    return name.replaceAll(followedByCapitalized, replacement)
-        .replaceAll(followedByDigit, replacement)
-        .toUpperCase();
-  }
-
-  public String toLowerCase(@NonNull String name) {
-    return name.toLowerCase();
-  }
-
-  public String toUpperCase(@NonNull String name) {
-    return name.toUpperCase();
-  }
-
-  public String toPascalCase(@NonNull String name) {
-    if (name.length() < 1) {
-      throw new IllegalArgumentException();
-    }
-    return name.substring(0, 1).toUpperCase() + name.substring(1);
-  }
-
-  public String toDromedaryCase(@NonNull String name) {
-    return name;
   }
 }
