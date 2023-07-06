@@ -7,6 +7,12 @@ import lombok.NonNull;
  */
 public class SnakeCaseNamingConverter implements FieldNamingConverter {
 
+  /**
+   * Converts the {@link String} to snake case.
+   *
+   * @param name the field name to convert
+   * @return the converted {@link String}
+   */
   @Override
   public String convert(@NonNull String name) {
     String replacement = "$1_$2";

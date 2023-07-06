@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 public @interface AvroField {
 
   String name() default "";
+
   boolean included() default true;
 }

@@ -30,7 +30,7 @@ import org.apache.avro.generic.GenericRecord;
 @RequiredArgsConstructor
 public class AvroSchema<T> {
 
-  private final static Map<Class<?>, Class<?>> wrapperMap = Map.of(
+  private static final Map<Class<?>, Class<?>> wrapperMap = Map.of(
       boolean.class, Boolean.class,
       byte.class, Byte.class,
       char.class, Character.class,
@@ -49,6 +49,7 @@ public class AvroSchema<T> {
   /**
    * Generates the schema belonging to the {@link Class} this {@link AvroSchema} was instantiated with.
    */
+  @SuppressWarnings("CyclomaticComplexity")
   public void generate() {
     schemaFields.clear();
     AvroRecord namingAnnotation = clazz.getAnnotation(AvroRecord.class);
@@ -62,8 +63,9 @@ public class AvroSchema<T> {
       schemaName = namingAnnotation.schemaName().equals("") ? clazz.getName() : namingAnnotation.schemaName();
     }
     Field[] fields = clazz.getDeclaredFields();
-    SchemaBuilder.FieldAssembler<Schema> schemaBuilder =
-        SchemaBuilder.record(schemaName).namespace(clazz.getPackageName()).fields();
+    SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder.record(schemaName)
+        .namespace(clazz.getPackageName())
+        .fields();
     try {
       List<Field> nonStaticValidFields = new ArrayList<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
@@ -80,7 +82,8 @@ public class AvroSchema<T> {
         if (fieldAnnotation != null && !fieldAnnotation.included()) {
           continue;
         }
-        String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
+        String originalFieldName =
+            lookup.revealDirect(fieldHandles.get(field)).getName();
         String processedFieldName;
         if (fieldAnnotation == null || fieldAnnotation.name().equals("")) {
           processedFieldName = fieldNameConverter.convert(originalFieldName);
@@ -112,7 +115,8 @@ public class AvroSchema<T> {
       for (Field field : fields) {
         MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
         MethodHandle handle = lookup.unreflectGetter(field);
-        if (!Modifier.isStatic(field.getModifiers()) && schemaFields.containsKey(lookup.revealDirect(handle).getName())) {
+        if (!Modifier.isStatic(field.getModifiers())
+            && schemaFields.containsKey(lookup.revealDirect(handle).getName())) {
           record.put(schemaFields.get(lookup.revealDirect(handle).getName()), handle.invoke(pojo));
         }
       }
@@ -144,8 +148,9 @@ public class AvroSchema<T> {
    * @return the {@link SchemaBuilder.FieldAssembler} with the field added
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
-  public SchemaBuilder.FieldAssembler<Schema> setField(Class<?> fieldType, String fieldName,
-                                                       @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder) throws IllegalAccessException {
+  public SchemaBuilder.FieldAssembler<Schema> setField(
+      Class<?> fieldType, String fieldName, @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder)
+      throws IllegalAccessException {
     SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
     Class<?> wrappedType = toWrapper(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
