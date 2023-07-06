@@ -7,8 +7,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +70,14 @@ public class AvroSchema<T> {
         .fields();
     try {
       List<Field> nonStaticValidFields = new ArrayList<>();
+      Set<Field> finalFields = new HashSet<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
       MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
       for (Field field : fields) {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
+        } else if (Modifier.isFinal(field.getModifiers())) {
+          finalFields.add(field);
         }
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
