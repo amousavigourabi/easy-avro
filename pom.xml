@@ -28,15 +28,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.28</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <version>1.11.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.28</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -50,17 +50,18 @@
         <configuration>
           <formats>
             <format>
+              <endWithNewline/>
               <includes>
                 <include>Dockerfile</include>
               </includes>
-              <trimTrailingWhitespace/>
-              <endWithNewline/>
               <indent>
                 <spaces>true</spaces>
                 <spacesPerTab>8</spacesPerTab>
               </indent>
+              <trimTrailingWhitespace/>
             </format>
             <format>
+              <endWithNewline/>
               <includes>
                 <include>*.md</include>
                 <include>*.yml</include>
@@ -68,12 +69,11 @@
                 <include>*.properties</include>
                 <include>.gitignore</include>
               </includes>
-              <trimTrailingWhitespace/>
-              <endWithNewline/>
               <indent>
                 <spaces>true</spaces>
                 <spacesPerTab>2</spacesPerTab>
               </indent>
+              <trimTrailingWhitespace/>
             </format>
           </formats>
           <java>
@@ -116,9 +116,9 @@
         <version>${checkstyle.version}</version>
         <configuration>
           <configLocation>config/checkstyle.xml</configLocation>
-          <suppressionsLocation>config/checkstyle-suppressions.xml</suppressionsLocation>
           <consoleOutput>false</consoleOutput>
           <failsOnError>true</failsOnError>
+          <suppressionsLocation>config/checkstyle-suppressions.xml</suppressionsLocation>
         </configuration>
         <executions>
           <execution>
@@ -133,12 +133,11 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${pmd.version}</version>
         <configuration>
-          <format>net.sourceforge.pmd.renderers.SummaryHTMLRenderer</format>
-          <inputEncoding>utf-8</inputEncoding>
-          <minimumTokens>100</minimumTokens>
           <excludeRoots>
             <excludeRoot>**/generated-sources/**</excludeRoot>
           </excludeRoots>
+          <inputEncoding>utf-8</inputEncoding>
+          <minimumTokens>100</minimumTokens>
         </configuration>
         <executions>
           <execution>
@@ -155,12 +154,12 @@
         <configuration>
           <rules>
             <dependencyConvergence/>
-            <requireMavenVersion>
-              <version>${maven.version}</version>
-            </requireMavenVersion>
             <requireJavaVersion>
               <version>${maven.compiler.source}</version>
             </requireJavaVersion>
+            <requireMavenVersion>
+              <version>${maven.version}</version>
+            </requireMavenVersion>
           </rules>
         </configuration>
         <executions>
@@ -176,14 +175,14 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>
-          <rerunFailingTestsCount>3</rerunFailingTestsCount>
           <argLine>${argLine}</argLine>
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
           <excludes>
             <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <rerunFailingTestsCount>3</rerunFailingTestsCount>
         </configuration>
       </plugin>
       <plugin>
@@ -191,11 +190,11 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${failsafe.version}</version>
         <configuration>
-          <rerunFailingTestsCount>3</rerunFailingTestsCount>
           <argLine>${argLine}</argLine>
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
+          <rerunFailingTestsCount>3</rerunFailingTestsCount>
         </configuration>
         <executions>
           <execution>
