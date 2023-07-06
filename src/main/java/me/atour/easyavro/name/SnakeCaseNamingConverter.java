@@ -2,6 +2,9 @@ package me.atour.easyavro.name;
 
 import lombok.NonNull;
 
+/**
+ * Converts field names to snake case.
+ */
 public class SnakeCaseNamingConverter implements FieldNamingConverter {
 
   @Override

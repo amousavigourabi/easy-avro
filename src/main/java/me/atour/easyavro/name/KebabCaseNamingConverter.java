@@ -2,6 +2,9 @@ package me.atour.easyavro.name;
 
 import lombok.NonNull;
 
+/**
+ * Converts field names to kebab case.
+ */
 public class KebabCaseNamingConverter implements FieldNamingConverter {
 
   @Override

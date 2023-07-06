@@ -20,6 +20,11 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 
+/**
+ * Generates the {@link Schema} and corresponding {@link GenericRecord}s from POJOs.
+ *
+ * @param <T> type parameter representing the class the POJOs belong to and the {@link Schema} is generated for.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class AvroSchema<T> {
