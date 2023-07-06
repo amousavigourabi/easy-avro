@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.atour.easyavro.name.DromedaryCaseNamingConverter;
@@ -69,27 +70,11 @@ public class AvroSchema<T> {
         }
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
-        if (String.class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.requiredString(processedFieldName);
-        } else if (long.class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.requiredLong(processedFieldName);
-        } else if (int.class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.requiredInt(processedFieldName);
-        } else if (double.class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.requiredDouble(processedFieldName);
-        } else if (long[].class.isAssignableFrom(fieldType)
-            || Long[].class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.name(processedFieldName).type().array().items().longType().noDefault();
-        } else if (Map.class.isAssignableFrom(fieldType)) {
-          schemaBuilder = schemaBuilder.name(processedFieldName).type().map().values().stringType().noDefault();
-        } else {
-          log.error("Cannot create a valid encoding for {}.", fieldType);
-          throw new IllegalAccessException(fieldType.toString());
-        }
+        schemaBuilder = setField(fieldType, processedFieldName, schemaBuilder);
         schemaFields.put(originalFieldName, processedFieldName);
       }
       schema = schemaBuilder.endRecord();
-    } catch (Throwable e) {
+    } catch (IllegalAccessException e) {
       log.error("Cannot generate a valid schema for {} in {}.", e.getMessage(), clazz);
       throw new CannotGenerateSchemaException(e);
     }
@@ -110,5 +95,44 @@ public class AvroSchema<T> {
       log.error("Could not convert to Avro record {}.", e.getMessage());
     }
     return record;
+  }
+
+  public Class<?> toWrapper(@NonNull Class<?> possiblyPrimitive) {
+    if (!possiblyPrimitive.isPrimitive()) {
+      return possiblyPrimitive;
+    }
+    Map<Class<?>, Class<?>> wrapperMap = Map.of(boolean.class, Boolean.class,
+                                                byte.class, Byte.class,
+                                                char.class, Character.class,
+                                                double.class, Double.class,
+                                                float.class, Float.class,
+                                                int.class, Integer.class,
+                                                long.class, Long.class,
+                                                short.class, Short.class);
+    return wrapperMap.get(possiblyPrimitive);
+  }
+
+  public SchemaBuilder.FieldAssembler<Schema> setField(Class<?> fieldType, String fieldName,
+                                                       SchemaBuilder.FieldAssembler<Schema> schemaBuilder) throws IllegalAccessException {
+    SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
+    Class<?> wrappedType = toWrapper(fieldType);
+    if (Boolean.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredBoolean(fieldName);
+    } else if (Long.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredLong(fieldName);
+    } else if (Integer.class.isAssignableFrom(wrappedType)
+        || Byte.class.isAssignableFrom(wrappedType)
+        || Character.class.isAssignableFrom(wrappedType)
+        || Short.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredInt(fieldName);
+    } else if (Double.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredDouble(fieldName);
+    } else if (Float.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredFloat(fieldName);
+    } else {
+      log.error("Cannot create a valid encoding for {}.", fieldType);
+      throw new IllegalAccessException(fieldType.toString());
+    }
+    return builder;
   }
 }
