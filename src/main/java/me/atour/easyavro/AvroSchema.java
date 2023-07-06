@@ -47,7 +47,36 @@ public class AvroSchema<T> {
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
-      UnaryOperator<String> fieldNameConverter = this::toSnakeCase;
+      AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
+      UnaryOperator<String> fieldNameConverter;
+      if (namingAnnotation != null) {
+        switch (namingAnnotation.strategy()) {
+          case SCREAMING_SNAKE_CASE:
+            fieldNameConverter = this::toScreamingSnakeCase;
+            break;
+          case KEBAB_CASE:
+            fieldNameConverter = this::toKebabCase;
+            break;
+          case LOWERCASE:
+            fieldNameConverter = this::toLowerCase;
+            break;
+          case UPPERCASE:
+            fieldNameConverter = this::toUpperCase;
+            break;
+          case PASCAL_CASE:
+            fieldNameConverter = this::toPascalCase;
+            break;
+          case SNAKE_CASE:
+            fieldNameConverter = this::toSnakeCase;
+            break;
+          case DROMEDARY_CASE:
+          default:
+            fieldNameConverter = this::toDromedaryCase;
+            break;
+        }
+      } else {
+        fieldNameConverter = this::toDromedaryCase;
+      }
       for (Field field : nonStaticValidFields) {
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
@@ -130,5 +159,9 @@ public class AvroSchema<T> {
       throw new IllegalArgumentException();
     }
     return name.substring(0, 1).toUpperCase() + name.substring(1);
+  }
+
+  public String toDromedaryCase(@NonNull String name) {
+    return name;
   }
 }
