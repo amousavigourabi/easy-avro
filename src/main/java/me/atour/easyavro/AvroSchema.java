@@ -30,6 +30,9 @@ public class AvroSchema<T> {
   @Getter
   private Schema schema;
 
+  /**
+   * Generates the schema belonging to the {@link Class} this {@link AvroSchema} was instantiated with.
+   */
   public void generate() {
     schemaFields.clear();
     AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
@@ -80,6 +83,12 @@ public class AvroSchema<T> {
     }
   }
 
+  /**
+   * Converts a POJO to a {@link GenericRecord}.
+   *
+   * @param pojo the POJO to convert to a {@link GenericRecord}
+   * @return the generated {@link GenericRecord}
+   */
   public GenericRecord convertFromPojo(T pojo) {
     Field[] fields = clazz.getDeclaredFields();
     GenericData.Record record = new GenericData.Record(schema);
@@ -97,6 +106,12 @@ public class AvroSchema<T> {
     return record;
   }
 
+  /**
+   * Transforms a {@link Class} representing a primitive type to corresponding its wrapper.
+   *
+   * @param possiblyPrimitive the {@link Class} to transform
+   * @return a wrapped {@link Class} representation if the provided {@link Class} is a primitive
+   */
   public Class<?> toWrapper(@NonNull Class<?> possiblyPrimitive) {
     if (!possiblyPrimitive.isPrimitive()) {
       return possiblyPrimitive;
@@ -112,8 +127,16 @@ public class AvroSchema<T> {
     return wrapperMap.get(possiblyPrimitive);
   }
 
+  /**
+   * Adds a field to the {@link SchemaBuilder}.
+   *
+   * @param fieldType the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @param schemaBuilder the {@link SchemaBuilder.FieldAssembler} to add the field to
+   * @return the {@link SchemaBuilder.FieldAssembler} with the field added
+   */
   public SchemaBuilder.FieldAssembler<Schema> setField(Class<?> fieldType, String fieldName,
-                                                       SchemaBuilder.FieldAssembler<Schema> schemaBuilder) throws IllegalAccessException {
+                                                       @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder) throws IllegalAccessException {
     SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
     Class<?> wrappedType = toWrapper(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
