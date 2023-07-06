@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AvroRecordNaming {
+public @interface AvroRecord {
 
   /**
    * Enum representing the supported field naming strategies.

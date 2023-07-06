@@ -1,17 +1,17 @@
-package me.atour.easyavro.name;
+package me.atour.easyavro.field;
 
 import lombok.NonNull;
 
 /**
- * Converts field names to screaming snake case.
+ * Converts field names to snake case.
  */
-public class ScreamingSnakeCaseNamingConverter implements FieldNamingConverter {
+public class SnakeCaseNamingConverter implements FieldNamingConverter {
 
   @Override
   public String convert(@NonNull String name) {
     String replacement = "$1_$2";
     return name.replaceAll(followedByCapitalized, replacement)
         .replaceAll(followedByDigit, replacement)
-        .toUpperCase();
+        .toLowerCase();
   }
 }

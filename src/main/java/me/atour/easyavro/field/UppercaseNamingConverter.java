@@ -1,4 +1,4 @@
-package me.atour.easyavro.name;
+package me.atour.easyavro.field;
 
 import lombok.NonNull;
 

@@ -1,4 +1,4 @@
-package me.atour.easyavro;
+package me.atour.easyavro.field;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -13,8 +13,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.atour.easyavro.name.DromedaryCaseNamingConverter;
-import me.atour.easyavro.name.FieldNamingConverter;
+import me.atour.easyavro.field.AvroField;
+import me.atour.easyavro.field.DromedaryCaseNamingConverter;
+import me.atour.easyavro.field.FieldNamingConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -50,7 +51,7 @@ public class AvroSchema<T> {
    */
   public void generate() {
     schemaFields.clear();
-    AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
+    AvroRecord namingAnnotation = clazz.getAnnotation(AvroRecord.class);
     FieldNamingConverter fieldNameConverter;
     String schemaName;
     if (namingAnnotation == null) {
