@@ -18,6 +18,8 @@
     <checkstyle.version>3.3.0</checkstyle.version>
     <enforcer.version>3.3.0</enforcer.version>
     <failsafe.version>3.1.2</failsafe.version>
+    <pitest.junit.version>1.2.0</pitest.junit.version>
+    <pitest.version>1.14.2</pitest.version>
     <pmd.version>3.21.0</pmd.version>
     <shade.version>3.5.0</shade.version>
     <spotless.version>2.37.0</spotless.version>
@@ -225,6 +227,29 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>${pitest.version}</version>
+        <configuration>
+          <failWhenNoMutations>false</failWhenNoMutations>
+          <include>**/*Test.java</include>
+          <mutationThreshold>80</mutationThreshold>
+          <parseSurefireConfig>false</parseSurefireConfig>
+          <targetClasses>
+            <targetClass>me.atour.easyavro.*</targetClass>
+          </targetClasses>
+          <timestampedReports>false</timestampedReports>
+          <withHistory>true</withHistory>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>${pitest.junit.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
