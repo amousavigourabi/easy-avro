@@ -12,6 +12,10 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <checkstyle.version>3.3.0</checkstyle.version>
+    <pmd.version>3.21.0</pmd.version>
+    <spotless.version>2.37.0</spotless.version>
   </properties>
 
   <dependencies>
@@ -28,5 +32,115 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <formats>
+            <format>
+              <includes>
+                <include>Dockerfile</include>
+              </includes>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <spaces>true</spaces>
+                <spacesPerTab>8</spacesPerTab>
+              </indent>
+            </format>
+            <format>
+              <includes>
+                <include>*.md</include>
+                <include>*.yml</include>
+                <include>*.config</include>
+                <include>*.properties</include>
+                <include>.gitignore</include>
+              </includes>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <spaces>true</spaces>
+                <spacesPerTab>2</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+          <java>
+            <excludes>
+              <exclude>**/generated-sources/**</exclude>
+            </excludes>
+            <toggleOffOn/>
+            <removeUnusedImports/>
+            <importOrder/>
+            <trimTrailingWhitespace/>
+            <palantirJavaFormat/>
+            <endWithNewline/>
+            <formatAnnotations/>
+            <replaceRegex>
+              <name>star imports</name>
+              <searchRegex>import\s+[^\*\s]+\*;(\r\n|\r|\n)</searchRegex>
+              <replacement>$1</replacement>
+            </replaceRegex>
+            <indent>
+              <tabs>true</tabs>
+              <spacesPerTab>4</spacesPerTab>
+            </indent>
+            <indent>
+              <spaces>true</spaces>
+              <spacesPerTab>2</spacesPerTab>
+            </indent>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <configLocation>config/checkstyle.xml</configLocation>
+          <suppressionsLocation>config/checkstyle-suppressions.xml</suppressionsLocation>
+          <consoleOutput>false</consoleOutput>
+          <failsOnError>true</failsOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
+        <configuration>
+          <format>net.sourceforge.pmd.renderers.SummaryHTMLRenderer</format>
+          <inputEncoding>utf-8</inputEncoding>
+          <minimumTokens>100</minimumTokens>
+          <excludeRoots>
+            <excludeRoot>**/generated-sources/**</excludeRoot>
+          </excludeRoots>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
