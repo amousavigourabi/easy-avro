@@ -1,0 +1,6 @@
+* text=auto
+* text eol=lf
+
+CHANGELOG.md merge=union
+
+*.png binary

@@ -1,4 +1,4 @@
-package me.atour.easyavro;
+package me.atour.easyavro.field;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 public @interface AvroField {
 
   String name() default "";
+
   boolean included() default true;
 }

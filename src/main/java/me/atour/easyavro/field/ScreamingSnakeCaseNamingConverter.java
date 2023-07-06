@@ -1,4 +1,4 @@
-package me.atour.easyavro.name;
+package me.atour.easyavro.field;
 
 import lombok.NonNull;
 
@@ -7,6 +7,12 @@ import lombok.NonNull;
  */
 public class ScreamingSnakeCaseNamingConverter implements FieldNamingConverter {
 
+  /**
+   * Converts the {@link String} to screaming snake case.
+   *
+   * @param name the field name to convert
+   * @return the converted {@link String}
+   */
   @Override
   public String convert(@NonNull String name) {
     String replacement = "$1_$2";
