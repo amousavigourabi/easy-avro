@@ -12,8 +12,8 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.atour.easyavro.fieldnaming.DromedaryCaseNamingConverter;
-import me.atour.easyavro.fieldnaming.FieldNamingConverter;
+import me.atour.easyavro.name.DromedaryCaseNamingConverter;
+import me.atour.easyavro.name.FieldNamingConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -31,9 +31,19 @@ public class AvroSchema<T> {
 
   public void generate() {
     schemaFields.clear();
+    AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
+    FieldNamingConverter fieldNameConverter;
+    String schemaName;
+    if (namingAnnotation == null) {
+      fieldNameConverter = new DromedaryCaseNamingConverter();
+      schemaName = clazz.getName();
+    } else {
+      fieldNameConverter = FieldNamingConverter.of(namingAnnotation.fieldStrategy());
+      schemaName = namingAnnotation.schemaName().equals("") ? clazz.getName() : namingAnnotation.schemaName();
+    }
     Field[] fields = clazz.getDeclaredFields();
     SchemaBuilder.FieldAssembler<Schema> schemaBuilder =
-        SchemaBuilder.record(clazz.getName()).namespace(clazz.getPackageName()).fields();
+        SchemaBuilder.record(schemaName).namespace(clazz.getPackageName()).fields();
     try {
       List<Field> nonStaticValidFields = new ArrayList<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
@@ -45,9 +55,6 @@ public class AvroSchema<T> {
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
-      AvroRecordNaming namingAnnotation = clazz.getAnnotation(AvroRecordNaming.class);
-      FieldNamingConverter fieldNameConverter = namingAnnotation != null ?
-          FieldNamingConverter.of(namingAnnotation.strategy()) : new DromedaryCaseNamingConverter();
       for (Field field : nonStaticValidFields) {
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();

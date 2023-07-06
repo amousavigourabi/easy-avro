@@ -1,14 +1,14 @@
-package me.atour.easyavro.fieldnaming;
+package me.atour.easyavro.name;
 
 import lombok.NonNull;
 
-public class KebabCaseNamingConverter implements FieldNamingConverter {
+public class ScreamingSnakeCaseNamingConverter implements FieldNamingConverter {
 
   @Override
   public String convert(@NonNull String name) {
-    String replacement = "$1-$2";
+    String replacement = "$1_$2";
     return name.replaceAll(followedByCapitalized, replacement)
         .replaceAll(followedByDigit, replacement)
-        .toLowerCase();
+        .toUpperCase();
   }
 }

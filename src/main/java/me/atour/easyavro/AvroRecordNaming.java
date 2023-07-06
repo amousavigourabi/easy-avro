@@ -16,5 +16,6 @@ public @interface AvroRecordNaming {
     PASCAL_CASE
   }
 
-  FieldNamingStrategies strategy() default FieldNamingStrategies.DROMEDARY_CASE;
+  String schemaName() default "";
+  FieldNamingStrategies fieldStrategy() default FieldNamingStrategies.DROMEDARY_CASE;
 }
