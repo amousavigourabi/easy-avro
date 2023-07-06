@@ -2,6 +2,9 @@ package me.atour.easyavro.name;
 
 import lombok.NonNull;
 
+/**
+ * Converts field names to pascal case.
+ */
 public class PascalCaseNamingConverter implements FieldNamingConverter {
 
   @Override
