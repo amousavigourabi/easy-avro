@@ -17,6 +17,7 @@
 
     <checkstyle.version>3.3.0</checkstyle.version>
     <pmd.version>3.21.0</pmd.version>
+    <shade.version>3.5.0</shade.version>
     <spotless.version>2.37.0</spotless.version>
   </properties>
 
@@ -193,6 +194,28 @@
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${shade.version}</version>
+        <configuration>
+          <minimizeJar>true</minimizeJar>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+              <addHeader>false</addHeader>
+            </transformer>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer">
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>shade</goal>
             </goals>
           </execution>
         </executions>
