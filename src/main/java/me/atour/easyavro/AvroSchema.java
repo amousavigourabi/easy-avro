@@ -56,10 +56,19 @@ public class AvroSchema<T> {
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
       for (Field field : nonStaticValidFields) {
+        AvroField fieldAnnotation = field.getAnnotation(AvroField.class);
+        if (fieldAnnotation != null && !fieldAnnotation.included()) {
+          continue;
+        }
+        String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
+        String processedFieldName;
+        if (fieldAnnotation == null || fieldAnnotation.name().equals("")) {
+          processedFieldName = fieldNameConverter.convert(originalFieldName);
+        } else {
+          processedFieldName = fieldAnnotation.name();
+        }
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
-        String originalFieldName = lookup.revealDirect(fieldHandles.get(field)).getName();
-        String processedFieldName = fieldNameConverter.convert(originalFieldName);
         if (String.class.isAssignableFrom(fieldType)) {
           schemaBuilder = schemaBuilder.requiredString(processedFieldName);
         } else if (long.class.isAssignableFrom(fieldType)) {
