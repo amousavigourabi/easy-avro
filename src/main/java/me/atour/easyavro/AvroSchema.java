@@ -24,6 +24,16 @@ import org.apache.avro.generic.GenericRecord;
 @RequiredArgsConstructor
 public class AvroSchema<T> {
 
+  private final static Map<Class<?>, Class<?>> wrapperMap = Map.of(
+      boolean.class, Boolean.class,
+      byte.class, Byte.class,
+      char.class, Character.class,
+      double.class, Double.class,
+      float.class, Float.class,
+      int.class, Integer.class,
+      long.class, Long.class,
+      short.class, Short.class);
+
   private final Class<T> clazz;
   private final Map<String, String> schemaFields = new HashMap<>();
 
@@ -116,14 +126,6 @@ public class AvroSchema<T> {
     if (!possiblyPrimitive.isPrimitive()) {
       return possiblyPrimitive;
     }
-    Map<Class<?>, Class<?>> wrapperMap = Map.of(boolean.class, Boolean.class,
-                                                byte.class, Byte.class,
-                                                char.class, Character.class,
-                                                double.class, Double.class,
-                                                float.class, Float.class,
-                                                int.class, Integer.class,
-                                                long.class, Long.class,
-                                                short.class, Short.class);
     return wrapperMap.get(possiblyPrimitive);
   }
 
