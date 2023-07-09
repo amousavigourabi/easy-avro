@@ -81,7 +81,7 @@ public class SchemaFactory {
    * @param isRequired whether the field is required
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
-  public void setField(Class<?> fieldType, String fieldName, boolean isRequired) {
+  private void setField(Class<?> fieldType, String fieldName, boolean isRequired) {
     if (isRequired) {
       setRequiredField(fieldType, fieldName);
     } else {
@@ -96,7 +96,7 @@ public class SchemaFactory {
    * @param fieldName the field name
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
-  public void setRequiredField(Class<?> fieldType, String fieldName) {
+  private void setRequiredField(Class<?> fieldType, String fieldName) {
     Class<?> wrappedType = toWrapper(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredBoolean(fieldName);
@@ -124,7 +124,7 @@ public class SchemaFactory {
    * @param fieldName the field name
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
-  public void setOptionalField(Class<?> fieldType, String fieldName) {
+  private void setOptionalField(Class<?> fieldType, String fieldName) {
     Class<?> wrappedType = toWrapper(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalBoolean(fieldName);
@@ -151,7 +151,7 @@ public class SchemaFactory {
    * @param possiblyPrimitive the {@link Class} to transform
    * @return a wrapped {@link Class} representation if the provided {@link Class} is a primitive
    */
-  public Class<?> toWrapper(@NonNull Class<?> possiblyPrimitive) {
+  private Class<?> toWrapper(@NonNull Class<?> possiblyPrimitive) {
     if (!possiblyPrimitive.isPrimitive()) {
       return possiblyPrimitive;
     }
