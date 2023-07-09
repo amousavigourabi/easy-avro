@@ -40,10 +40,13 @@ public class AvroSchema<T> {
     String schemaName;
     if (namingAnnotation == null) {
       fieldNameConverter = new DromedaryCaseNamingConverter();
-      schemaName = clazz.getName();
+      schemaName = clazz.getName().replace('$', '_');
     } else {
       fieldNameConverter = FieldNamingConverter.of(namingAnnotation.fieldStrategy());
       schemaName = namingAnnotation.schemaName().equals("") ? clazz.getName() : namingAnnotation.schemaName();
+    }
+    if (schemaName.toLowerCase().startsWith("avro")) {
+      schemaName = schemaName.substring(4);
     }
     try {
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
