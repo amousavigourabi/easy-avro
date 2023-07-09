@@ -1,10 +1,10 @@
 package me.atour.easyavro.field;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import me.atour.easyavro.AvroRecord;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class FieldNamingConverterTest {
 
