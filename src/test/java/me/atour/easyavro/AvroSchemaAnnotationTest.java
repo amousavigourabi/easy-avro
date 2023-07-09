@@ -28,6 +28,8 @@ class AvroSchemaAnnotationTest {
 
     @AvroField(included = false)
     private String notIncluded;
+
+    private String included;
   }
 
   @Test
@@ -50,6 +52,7 @@ class AvroSchemaAnnotationTest {
         .namespace("me.atour.easyavro")
         .fields()
         .requiredInt("SHORT_ONE")
+        .optionalString("INCLUDED")
         .optionalBoolean("boolean")
         .endRecord();
     assertThat(schema.getSchema()).isEqualTo(expected);
