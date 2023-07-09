@@ -13,13 +13,21 @@ class AvroSchemaTest {
 
   @SuppressWarnings("unused")
   @RequiredArgsConstructor
-  private static class Wrapper {
+  private static class AvroSchemaWrapper {
     private final Short wrapped;
   }
 
   @SuppressWarnings("unused")
   @RequiredArgsConstructor
   private static class SimpleDto {
+    private final Boolean boolOne;
+    private final boolean boolTwo;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class SimpleWithStaticDto {
+    private static String STRING;
     private final Boolean boolOne;
     private final boolean boolTwo;
   }
@@ -52,9 +60,9 @@ class AvroSchemaTest {
 
   @Test
   public void generateSchemaOfSimpleWrapper() {
-    AvroSchema<Wrapper> schema = new AvroSchema<>(Wrapper.class);
+    AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
     schema.generate();
-    Schema expected = SchemaBuilder.record("AvroSchemaTest_Wrapper")
+    Schema expected = SchemaBuilder.record("SchemaTest_AvroSchemaWrapper")
         .namespace("me.atour.easyavro")
         .fields()
         .requiredInt("wrapped")
@@ -66,7 +74,7 @@ class AvroSchemaTest {
   public void generateSchemaWithOnlyOnePrimitiveTypeTwoTimes() {
     AvroSchema<SimpleDto> schema = new AvroSchema<>(SimpleDto.class);
     schema.generate();
-    Schema expected = SchemaBuilder.record("AvroSchemaTest_SimpleDto")
+    Schema expected = SchemaBuilder.record("SchemaTest_SimpleDto")
         .namespace("me.atour.easyavro")
         .fields()
         .requiredBoolean("boolTwo")
@@ -76,10 +84,23 @@ class AvroSchemaTest {
   }
 
   @Test
+  public void generateSchemaWithTwoPrimitivesAndOneStaticField() {
+    AvroSchema<SimpleWithStaticDto> schema = new AvroSchema<>(SimpleWithStaticDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_SimpleWithStaticDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .requiredBoolean("boolOne")
+        .requiredBoolean("boolTwo")
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
   public void generateSchemaContainingMultiplePrimitiveTypes() {
     AvroSchema<MultipleOptionalTypesDto> schema = new AvroSchema<>(MultipleOptionalTypesDto.class);
     schema.generate();
-    Schema expected = SchemaBuilder.record("AvroSchemaTest_MultipleOptionalTypesDto")
+    Schema expected = SchemaBuilder.record("SchemaTest_MultipleOptionalTypesDto")
         .namespace("me.atour.easyavro")
         .fields()
         .optionalInt("charOne")
@@ -98,7 +119,7 @@ class AvroSchemaTest {
   public void generateSchemaContainingMultipleFinalPrimitiveTypes() {
     AvroSchema<MultipleTypesDto> schema = new AvroSchema<>(MultipleTypesDto.class);
     schema.generate();
-    Schema expected = SchemaBuilder.record("AvroSchemaTest_MultipleTypesDto")
+    Schema expected = SchemaBuilder.record("SchemaTest_MultipleTypesDto")
         .namespace("me.atour.easyavro")
         .fields()
         .requiredBoolean("boolOne")
@@ -115,11 +136,22 @@ class AvroSchemaTest {
 
   @Test
   public void convertSimplePojoToGenericRecord() {
-    AvroSchema<Wrapper> schema = new AvroSchema<>(Wrapper.class);
+    AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
     schema.generate();
-    Wrapper wrapper = new Wrapper((short) 1);
+    AvroSchemaWrapper avroSchemaWrapper = new AvroSchemaWrapper((short) 1);
     GenericRecord expected = new GenericData.Record(schema.getSchema());
     expected.put("wrapped", (short) 1);
-    assertThat(schema.convertFromPojo(wrapper)).isEqualTo(expected);
+    assertThat(schema.convertFromPojo(avroSchemaWrapper)).isEqualTo(expected);
+  }
+
+  @Test
+  public void convertSimplePojoWithStaticFieldToGenericRecord() {
+    AvroSchema<SimpleWithStaticDto> schema = new AvroSchema<>(SimpleWithStaticDto.class);
+    schema.generate();
+    SimpleWithStaticDto dto = new SimpleWithStaticDto(false, true);
+    GenericRecord expected = new GenericData.Record(schema.getSchema());
+    expected.put("boolOne", false);
+    expected.put("boolTwo", true);
+    assertThat(schema.convertFromPojo(dto)).isEqualTo(expected);
   }
 }

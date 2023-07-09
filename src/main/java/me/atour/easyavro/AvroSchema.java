@@ -41,6 +41,7 @@ public class AvroSchema<T> {
     if (namingAnnotation == null) {
       fieldNameConverter = new DromedaryCaseNamingConverter();
       schemaName = clazz.getName().replace('$', '_');
+      schemaName = schemaName.substring(schemaName.lastIndexOf('.') + 1);
     } else {
       fieldNameConverter = FieldNamingConverter.of(namingAnnotation.fieldStrategy());
       schemaName = namingAnnotation.schemaName().equals("") ? clazz.getName() : namingAnnotation.schemaName();
