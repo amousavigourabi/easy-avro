@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import org.apache.avro.generic.GenericRecord;
 public class AvroSchema<T> {
 
   private final Class<T> clazz;
-  private final Map<String, String> schemaFields = new HashMap<>();
+  private final Map<String, String> schemaFields = new ConcurrentHashMap<>();
 
   @Getter
   private Schema schema;
