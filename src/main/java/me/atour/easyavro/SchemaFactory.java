@@ -111,6 +111,8 @@ public class SchemaFactory {
       builder = builder.requiredDouble(fieldName);
     } else if (Float.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredFloat(fieldName);
+    } else if (String.class.isAssignableFrom(wrappedType)) {
+      builder = builder.requiredString(fieldName);
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
@@ -139,6 +141,8 @@ public class SchemaFactory {
       builder = builder.optionalDouble(fieldName);
     } else if (Float.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalFloat(fieldName);
+    } else if (String.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalString(fieldName);
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
