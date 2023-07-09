@@ -7,8 +7,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +70,14 @@ public class AvroSchema<T> {
         .fields();
     try {
       List<Field> nonStaticValidFields = new ArrayList<>();
+      Set<Field> finalFields = new HashSet<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
       MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
       for (Field field : fields) {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
+        } else if (Modifier.isFinal(field.getModifiers())) {
+          finalFields.add(field);
         }
         nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
@@ -92,7 +97,7 @@ public class AvroSchema<T> {
         }
         VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
         Class<?> fieldType = typeInfoHandle.varType();
-        schemaBuilder = setField(fieldType, processedFieldName, schemaBuilder);
+        schemaBuilder = setField(fieldType, processedFieldName, schemaBuilder, finalFields.contains(field));
         schemaFields.put(originalFieldName, processedFieldName);
       }
       schema = schemaBuilder.endRecord();
@@ -145,12 +150,33 @@ public class AvroSchema<T> {
    * @param fieldType the field type as a Java {@link Class}
    * @param fieldName the field name
    * @param schemaBuilder the {@link SchemaBuilder.FieldAssembler} to add the field to
+   * @param isRequired whether the field is required
    * @return the {@link SchemaBuilder.FieldAssembler} with the field added
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
   public SchemaBuilder.FieldAssembler<Schema> setField(
-      Class<?> fieldType, String fieldName, @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder)
-      throws IllegalAccessException {
+      Class<?> fieldType,
+      String fieldName,
+      @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder,
+      boolean isRequired) {
+    if (isRequired) {
+      return setRequiredField(fieldType, fieldName, schemaBuilder);
+    } else {
+      return setOptionalField(fieldType, fieldName, schemaBuilder);
+    }
+  }
+
+  /**
+   * Adds a required field to the {@link SchemaBuilder}.
+   *
+   * @param fieldType the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @param schemaBuilder the {@link SchemaBuilder.FieldAssembler} to add the field to
+   * @return the {@link SchemaBuilder.FieldAssembler} with the field added
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
+   */
+  public SchemaBuilder.FieldAssembler<Schema> setRequiredField(
+      Class<?> fieldType, String fieldName, @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder) {
     SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
     Class<?> wrappedType = toWrapper(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
@@ -166,6 +192,39 @@ public class AvroSchema<T> {
       builder = builder.requiredDouble(fieldName);
     } else if (Float.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredFloat(fieldName);
+    } else {
+      log.error("Cannot create a valid encoding for {}.", fieldType);
+      throw new CannotCreateValidEncodingException();
+    }
+    return builder;
+  }
+
+  /**
+   * Adds an optional field to the {@link SchemaBuilder}.
+   *
+   * @param fieldType the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @param schemaBuilder the {@link SchemaBuilder.FieldAssembler} to add the field to
+   * @return the {@link SchemaBuilder.FieldAssembler} with the field added
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
+   */
+  public SchemaBuilder.FieldAssembler<Schema> setOptionalField(
+      Class<?> fieldType, String fieldName, @NonNull SchemaBuilder.FieldAssembler<Schema> schemaBuilder) {
+    SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
+    Class<?> wrappedType = toWrapper(fieldType);
+    if (Boolean.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalBoolean(fieldName);
+    } else if (Long.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalLong(fieldName);
+    } else if (Integer.class.isAssignableFrom(wrappedType)
+        || Byte.class.isAssignableFrom(wrappedType)
+        || Character.class.isAssignableFrom(wrappedType)
+        || Short.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalInt(fieldName);
+    } else if (Double.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalDouble(fieldName);
+    } else if (Float.class.isAssignableFrom(wrappedType)) {
+      builder = builder.optionalFloat(fieldName);
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
