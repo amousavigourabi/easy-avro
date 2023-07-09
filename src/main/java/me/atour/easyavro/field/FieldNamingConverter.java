@@ -1,7 +1,7 @@
 package me.atour.easyavro.field;
 
 import lombok.NonNull;
-import me.atour.easyavro.AvroRecord;
+import me.atour.easyavro.FieldNamingStrategies;
 
 /**
  * Interface for field name converters.
@@ -26,7 +26,7 @@ public interface FieldNamingConverter {
    * @param strategy the strategy to return the corresponding {@link FieldNamingConverter} for
    * @return the corresponding {@link FieldNamingConverter}
    */
-  static FieldNamingConverter of(@NonNull AvroRecord.FieldNamingStrategies strategy) {
+  static FieldNamingConverter of(@NonNull FieldNamingStrategies strategy) {
     FieldNamingConverter converter;
     switch (strategy) {
       case LOWERCASE:
@@ -34,9 +34,6 @@ public interface FieldNamingConverter {
         break;
       case UPPERCASE:
         converter = new UppercaseNamingConverter();
-        break;
-      case KEBAB_CASE:
-        converter = new KebabCaseNamingConverter();
         break;
       case SNAKE_CASE:
         converter = new SnakeCaseNamingConverter();

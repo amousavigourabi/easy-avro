@@ -6,11 +6,11 @@
 
   <groupId>me.atour.easy-avro</groupId>
   <artifactId>easy-avro</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <maven.version>3.6.0</maven.version>
@@ -19,6 +19,8 @@
     <enforcer.version>3.3.0</enforcer.version>
     <failsafe.version>3.1.2</failsafe.version>
     <jacoco.version>0.8.10</jacoco.version>
+    <junit.jupiter.version>5.10.0-RC1</junit.jupiter.version>
+    <mockito.version>5.4.0</mockito.version>
     <pitest.junit.version>1.2.0</pitest.junit.version>
     <pitest.version>1.14.2</pitest.version>
     <pmd.version>3.21.0</pmd.version>
@@ -39,6 +41,43 @@
       <artifactId>lombok</artifactId>
       <version>1.18.28</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.24.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

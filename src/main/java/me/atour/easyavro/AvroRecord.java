@@ -13,19 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AvroRecord {
 
-  /**
-   * Enum representing the supported field naming strategies.
-   */
-  enum FieldNamingStrategies {
-    SNAKE_CASE,
-    KEBAB_CASE,
-    DROMEDARY_CASE,
-    UPPERCASE,
-    LOWERCASE,
-    SCREAMING_SNAKE_CASE,
-    PASCAL_CASE
-  }
-
   String schemaName() default "";
 
   FieldNamingStrategies fieldStrategy() default FieldNamingStrategies.DROMEDARY_CASE;
