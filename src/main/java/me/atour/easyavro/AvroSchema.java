@@ -5,12 +5,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +47,7 @@ public class AvroSchema<T> {
   /**
    * Generates the schema belonging to the {@link Class} this {@link AvroSchema} was instantiated with.
    */
-  @SuppressWarnings("CyclomaticComplexity")
   public void generate() {
-    schemaFields.clear();
     AvroRecord namingAnnotation = clazz.getAnnotation(AvroRecord.class);
     FieldNamingConverter fieldNameConverter;
     String schemaName;
@@ -64,47 +58,63 @@ public class AvroSchema<T> {
       fieldNameConverter = FieldNamingConverter.of(namingAnnotation.fieldStrategy());
       schemaName = namingAnnotation.schemaName().equals("") ? clazz.getName() : namingAnnotation.schemaName();
     }
-    Field[] fields = clazz.getDeclaredFields();
-    SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder.record(schemaName)
-        .namespace(clazz.getPackageName())
-        .fields();
     try {
-      List<Field> nonStaticValidFields = new ArrayList<>();
-      Set<Field> finalFields = new HashSet<>();
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
       MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
-      for (Field field : fields) {
+      for (Field field : clazz.getDeclaredFields()) {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
-        } else if (Modifier.isFinal(field.getModifiers())) {
-          finalFields.add(field);
         }
-        nonStaticValidFields.add(field);
         fieldHandles.put(field, lookup.unreflectGetter(field));
       }
-      for (Field field : nonStaticValidFields) {
-        AvroField fieldAnnotation = field.getAnnotation(AvroField.class);
-        if (fieldAnnotation != null && !fieldAnnotation.included()) {
-          continue;
-        }
-        String originalFieldName =
-            lookup.revealDirect(fieldHandles.get(field)).getName();
-        String processedFieldName;
-        if (fieldAnnotation == null || fieldAnnotation.name().equals("")) {
-          processedFieldName = fieldNameConverter.convert(originalFieldName);
-        } else {
-          processedFieldName = fieldAnnotation.name();
-        }
-        VarHandle typeInfoHandle = lookup.unreflectVarHandle(field);
-        Class<?> fieldType = typeInfoHandle.varType();
-        schemaBuilder = setField(fieldType, processedFieldName, schemaBuilder, finalFields.contains(field));
-        schemaFields.put(originalFieldName, processedFieldName);
-      }
-      schema = schemaBuilder.endRecord();
+      SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder.record(schemaName)
+          .namespace(clazz.getPackageName())
+          .fields();
+      setFields(fieldHandles, lookup, fieldNameConverter, schemaBuilder);
     } catch (IllegalAccessException e) {
-      log.error("Cannot generate a valid schema for {} in {}.", e.getMessage(), clazz);
+      log.error("Cannot generate a valid schema in {} because {}.", clazz, e.getMessage());
       throw new CannotGenerateSchemaException(e);
     }
+  }
+
+  /**
+   * Sets the passed fields in the schema.
+   *
+   * @param fields a {@link Map} of the {@link Field}s to add to their respective {@link MethodHandle}rs
+   * @param lookup the {@link MethodHandles.Lookup} to use for reflection
+   * @param fieldNameConverter the {@link FieldNamingConverter} of the strategy to apply on the fields
+   * @param schemaBuilder the {@link SchemaBuilder} to add the fields to
+   * @throws IllegalAccessException when reflection cannot access the fields it tries to access
+   */
+  public void setFields(
+      Map<Field, MethodHandle> fields,
+      MethodHandles.Lookup lookup,
+      FieldNamingConverter fieldNameConverter,
+      SchemaBuilder.FieldAssembler<Schema> schemaBuilder)
+      throws IllegalAccessException {
+    SchemaBuilder.FieldAssembler<Schema> builder = schemaBuilder;
+    Map<String, String> fieldNames = new HashMap<>();
+    for (Map.Entry<Field, MethodHandle> field : fields.entrySet()) {
+      AvroField fieldAnnotation = field.getKey().getAnnotation(AvroField.class);
+      if (fieldAnnotation != null && !fieldAnnotation.included()) {
+        continue;
+      }
+      String originalFieldName = lookup.revealDirect(field.getValue()).getName();
+      String processedFieldName;
+      if (fieldAnnotation == null || fieldAnnotation.name().equals("")) {
+        processedFieldName = fieldNameConverter.convert(originalFieldName);
+      } else {
+        processedFieldName = fieldAnnotation.name();
+      }
+      VarHandle typeInfoHandle = lookup.unreflectVarHandle(field.getKey());
+      Class<?> fieldType = typeInfoHandle.varType();
+      boolean isFinal = Modifier.isFinal(field.getKey().getModifiers());
+      builder = setField(fieldType, processedFieldName, schemaBuilder, isFinal);
+      fieldNames.put(originalFieldName, processedFieldName);
+    }
+    schemaFields.clear();
+    schemaFields.putAll(fieldNames);
+    schema = builder.endRecord();
   }
 
   /**
