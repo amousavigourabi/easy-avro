@@ -19,9 +19,6 @@ class FieldNamingConverterTest {
       case UPPERCASE:
         assertThat(converter).isExactlyInstanceOf(UppercaseNamingConverter.class);
         break;
-      case KEBAB_CASE:
-        assertThat(converter).isExactlyInstanceOf(KebabCaseNamingConverter.class);
-        break;
       case SNAKE_CASE:
         assertThat(converter).isExactlyInstanceOf(SnakeCaseNamingConverter.class);
         break;
@@ -46,7 +43,6 @@ class FieldNamingConverterTest {
     switch (strategy) {
       case SNAKE_CASE:
       case LOWERCASE:
-      case KEBAB_CASE:
       case DROMEDARY_CASE:
         assertThat(result).isEqualTo("afullylowercasestring");
         break;
@@ -69,7 +65,6 @@ class FieldNamingConverterTest {
     switch (strategy) {
       case LOWERCASE:
       case SNAKE_CASE:
-      case KEBAB_CASE:
       default:
         assertThat(result).isEqualTo("afullyuppercasestring");
         break;
@@ -100,9 +95,6 @@ class FieldNamingConverterTest {
       case SNAKE_CASE:
         assertThat(result).isEqualTo("a_string_9_with_some_number");
         break;
-      case KEBAB_CASE:
-        assertThat(result).isEqualTo("a-string-9-with-some-number");
-        break;
       case SCREAMING_SNAKE_CASE:
         assertThat(result).isEqualTo("A_STRING_9_WITH_SOME_NUMBER");
         break;
@@ -131,9 +123,6 @@ class FieldNamingConverterTest {
       case SNAKE_CASE:
         assertThat(result).isEqualTo("a_string_with_some_number_9");
         break;
-      case KEBAB_CASE:
-        assertThat(result).isEqualTo("a-string-with-some-number-9");
-        break;
       case SCREAMING_SNAKE_CASE:
         assertThat(result).isEqualTo("A_STRING_WITH_SOME_NUMBER_9");
         break;
@@ -159,9 +148,6 @@ class FieldNamingConverterTest {
       case SNAKE_CASE:
         assertThat(result).isEqualTo("2a_string_with_some_number");
         break;
-      case KEBAB_CASE:
-        assertThat(result).isEqualTo("2a-string-with-some-number");
-        break;
       case SCREAMING_SNAKE_CASE:
         assertThat(result).isEqualTo("2A_STRING_WITH_SOME_NUMBER");
         break;
@@ -181,7 +167,6 @@ class FieldNamingConverterTest {
     switch (strategy) {
       case LOWERCASE:
       case SNAKE_CASE:
-      case KEBAB_CASE:
       case DROMEDARY_CASE:
         assertThat(result).isEqualTo("a_string_with_underscores");
         break;

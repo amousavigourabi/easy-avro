@@ -35,9 +35,6 @@ public interface FieldNamingConverter {
       case UPPERCASE:
         converter = new UppercaseNamingConverter();
         break;
-      case KEBAB_CASE:
-        converter = new KebabCaseNamingConverter();
-        break;
       case SNAKE_CASE:
         converter = new SnakeCaseNamingConverter();
         break;

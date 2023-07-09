@@ -5,7 +5,6 @@ package me.atour.easyavro;
  */
 public enum FieldNamingStrategies {
   SNAKE_CASE,
-  KEBAB_CASE,
   DROMEDARY_CASE,
   UPPERCASE,
   LOWERCASE,
