@@ -2,15 +2,15 @@ package me.atour.easyavro.field;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import me.atour.easyavro.AvroRecord;
+import me.atour.easyavro.FieldNamingStrategies;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 class FieldNamingConverterTest {
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void getOf(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void getOf(FieldNamingStrategies strategy) {
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     switch (strategy) {
       case LOWERCASE:
@@ -38,8 +38,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertLowercaseString(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertLowercaseString(FieldNamingStrategies strategy) {
     String original = "afullylowercasestring";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
@@ -61,8 +61,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertUppercaseString(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertUppercaseString(FieldNamingStrategies strategy) {
     String original = "AFULLYUPPERCASESTRING";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
@@ -82,8 +82,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertStringWithSomeSingleDigitNumberInTheMiddle(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertStringWithSomeSingleDigitNumberInTheMiddle(FieldNamingStrategies strategy) {
     String original = "aString9WithSomeNumber";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
@@ -113,8 +113,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertStringWithSomeSingleDigitNumberAtTheEnd(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertStringWithSomeSingleDigitNumberAtTheEnd(FieldNamingStrategies strategy) {
     String original = "aStringWithSomeNumber9";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
@@ -144,8 +144,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertStringWithSomeSingleDigitNumberWithSuffixAtTheStart(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertStringWithSomeSingleDigitNumberWithSuffixAtTheStart(FieldNamingStrategies strategy) {
     String original = "2aStringWithSomeNumber";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
@@ -156,9 +156,6 @@ class FieldNamingConverterTest {
       case UPPERCASE:
         assertThat(result).isEqualTo("2ASTRINGWITHSOMENUMBER");
         break;
-      case PASCAL_CASE:
-        assertThat(result).isEqualTo("2aStringWithSomeNumber");
-        break;
       case SNAKE_CASE:
         assertThat(result).isEqualTo("2a_string_with_some_number");
         break;
@@ -168,6 +165,7 @@ class FieldNamingConverterTest {
       case SCREAMING_SNAKE_CASE:
         assertThat(result).isEqualTo("2A_STRING_WITH_SOME_NUMBER");
         break;
+      case PASCAL_CASE:
       case DROMEDARY_CASE:
       default:
         assertThat(result).isEqualTo("2aStringWithSomeNumber");
@@ -175,8 +173,8 @@ class FieldNamingConverterTest {
   }
 
   @ParameterizedTest
-  @EnumSource(AvroRecord.FieldNamingStrategies.class)
-  public void convertStringWithUnderscores(AvroRecord.FieldNamingStrategies strategy) {
+  @EnumSource(FieldNamingStrategies.class)
+  public void convertStringWithUnderscores(FieldNamingStrategies strategy) {
     String original = "a_string_with_underscores";
     FieldNamingConverter converter = FieldNamingConverter.of(strategy);
     String result = converter.convert(original);
