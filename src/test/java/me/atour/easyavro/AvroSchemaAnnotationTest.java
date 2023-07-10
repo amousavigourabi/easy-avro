@@ -32,6 +32,12 @@ class AvroSchemaAnnotationTest {
     private String included;
   }
 
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class WrapWrapper {
+    private final AvroSchemaWrapper wrapper;
+  }
+
   @Test
   public void generateSchemaOfSimpleWrapper() {
     AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
@@ -54,6 +60,25 @@ class AvroSchemaAnnotationTest {
         .requiredInt("SHORT_ONE")
         .optionalString("INCLUDED")
         .optionalBoolean("boolean")
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaOfCustomTypeFieldWithAnnotation() {
+    AvroSchema<WrapWrapper> schema = new AvroSchema<>(WrapWrapper.class);
+    schema.generate();
+    Schema wrap = SchemaBuilder.record("wrapper")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .requiredInt("wrapped_short")
+        .endRecord();
+    Schema expected = SchemaBuilder.record("SchemaAnnotationTest_WrapWrapper")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("wrapper")
+        .type(wrap)
+        .noDefault()
         .endRecord();
     assertThat(schema.getSchema()).isEqualTo(expected);
   }
