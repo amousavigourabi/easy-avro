@@ -113,6 +113,10 @@ public class SchemaFactory {
       builder = builder.requiredFloat(fieldName);
     } else if (String.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredString(fieldName);
+    } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
+      AvroSchema<?> schema = new AvroSchema<>(wrappedType);
+      schema.generate();
+      builder = builder.name(fieldName).type(schema.getSchema()).noDefault();
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
@@ -143,6 +147,10 @@ public class SchemaFactory {
       builder = builder.optionalFloat(fieldName);
     } else if (String.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalString(fieldName);
+    } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
+      AvroSchema<?> schema = new AvroSchema<>(wrappedType);
+      schema.generate();
+      builder = builder.name(fieldName).type(schema.getSchema()).noDefault();
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
