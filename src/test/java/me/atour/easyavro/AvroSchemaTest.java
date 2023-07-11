@@ -65,6 +65,18 @@ class AvroSchemaTest {
     private final Integer[] intArrayTwo;
   }
 
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class MultipleArrayTypeDto {
+    private final int[] intArray;
+    private final double[] doubleArray;
+    private final float[] floatArray;
+    private final String[] stringArray;
+    private final Character[] charArray;
+    private final boolean[] boolArray;
+    private final Long[] longArray;
+  }
+
   @Test
   public void generateSchemaOfSimpleWrapper() {
     AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
@@ -159,6 +171,59 @@ class AvroSchemaTest {
         .array()
         .items()
         .intType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaContainingMultipleArrayTypes() {
+    AvroSchema<MultipleArrayTypeDto> schema = new AvroSchema<>(MultipleArrayTypeDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_MultipleArrayTypeDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("longArray")
+        .type()
+        .array()
+        .items()
+        .longType()
+        .noDefault()
+        .name("floatArray")
+        .type()
+        .array()
+        .items()
+        .floatType()
+        .noDefault()
+        .name("boolArray")
+        .type()
+        .array()
+        .items()
+        .booleanType()
+        .noDefault()
+        .name("doubleArray")
+        .type()
+        .array()
+        .items()
+        .doubleType()
+        .noDefault()
+        .name("charArray")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
+        .name("intArray")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
+        .name("stringArray")
+        .type()
+        .array()
+        .items()
+        .stringType()
         .noDefault()
         .endRecord();
     assertThat(schema.getSchema()).isEqualTo(expected);
