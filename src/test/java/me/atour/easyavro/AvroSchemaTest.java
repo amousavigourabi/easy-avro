@@ -58,6 +58,13 @@ class AvroSchemaTest {
     private short shortOne;
   }
 
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class ArrayTypeDto {
+    private final int[] intArrayOne;
+    private final Integer[] intArrayTwo;
+  }
+
   @Test
   public void generateSchemaOfSimpleWrapper() {
     AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
@@ -135,6 +142,19 @@ class AvroSchemaTest {
   }
 
   @Test
+  public void generateSchemaContainingArrayTypes() {
+    AvroSchema<ArrayTypeDto> schema = new AvroSchema<>(ArrayTypeDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_ArrayTypeDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("intArrayTwo").type().array().items().intType().noDefault()
+        .name("intArrayOne").type().array().items().intType().noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
   public void convertSimplePojoToGenericRecord() {
     AvroSchema<AvroSchemaWrapper> schema = new AvroSchema<>(AvroSchemaWrapper.class);
     schema.generate();
@@ -153,5 +173,19 @@ class AvroSchemaTest {
     expected.put("boolOne", false);
     expected.put("boolTwo", true);
     assertThat(schema.convertFromPojo(dto)).isEqualTo(expected);
+  }
+
+  @Test
+  public void convertSimplePojoWithArrayFieldToGenericRecord() {
+    AvroSchema<ArrayTypeDto> schema = new AvroSchema<>(ArrayTypeDto.class);
+    schema.generate();
+    ArrayTypeDto dto = new ArrayTypeDto(new int[] {1, 2}, new Integer[] {1, 2});
+    GenericRecord actual = schema.convertFromPojo(dto);
+    int[] actualArrayOne = (int[]) actual.get("intArrayOne");
+    Integer[] actualArrayTwo = (Integer[]) actual.get("intArrayTwo");
+    assertThat(actualArrayOne[0]).isEqualTo(1);
+    assertThat(actualArrayOne[1]).isEqualTo(2);
+    assertThat(actualArrayTwo[0]).isEqualTo(1);
+    assertThat(actualArrayTwo[1]).isEqualTo(2);
   }
 }
