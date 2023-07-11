@@ -27,6 +27,11 @@ public class SchemaFactory {
       long.class, Long.class,
       short.class, Short.class);
 
+  private static final Map<Class<?>, Class<?>> simplifyMap = Map.of(
+      Byte.class, Integer.class,
+      Character.class, Integer.class,
+      Short.class, Integer.class);
+
   private SchemaBuilder.FieldAssembler<Schema> builder;
 
   /**
@@ -97,15 +102,12 @@ public class SchemaFactory {
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
   private void setRequiredField(Class<?> fieldType, String fieldName) {
-    Class<?> wrappedType = toWrapper(fieldType);
+    Class<?> wrappedType = simplifyType(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredBoolean(fieldName);
     } else if (Long.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredLong(fieldName);
-    } else if (Integer.class.isAssignableFrom(wrappedType)
-        || Byte.class.isAssignableFrom(wrappedType)
-        || Character.class.isAssignableFrom(wrappedType)
-        || Short.class.isAssignableFrom(wrappedType)) {
+    } else if (Integer.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredInt(fieldName);
     } else if (Double.class.isAssignableFrom(wrappedType)) {
       builder = builder.requiredDouble(fieldName);
@@ -131,15 +133,12 @@ public class SchemaFactory {
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
   private void setOptionalField(Class<?> fieldType, String fieldName) {
-    Class<?> wrappedType = toWrapper(fieldType);
+    Class<?> wrappedType = simplifyType(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalBoolean(fieldName);
     } else if (Long.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalLong(fieldName);
-    } else if (Integer.class.isAssignableFrom(wrappedType)
-        || Byte.class.isAssignableFrom(wrappedType)
-        || Character.class.isAssignableFrom(wrappedType)
-        || Short.class.isAssignableFrom(wrappedType)) {
+    } else if (Integer.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalInt(fieldName);
     } else if (Double.class.isAssignableFrom(wrappedType)) {
       builder = builder.optionalDouble(fieldName);
@@ -159,15 +158,17 @@ public class SchemaFactory {
 
   /**
    * Transforms a {@link Class} representing a primitive type to corresponding its wrapper.
+   * Simplifies some classes further, {@link Short} to {@link Integer} for example.
    *
-   * @param possiblyPrimitive the {@link Class} to transform
-   * @return a wrapped {@link Class} representation if the provided {@link Class} is a primitive
+   * @param toSimplify the {@link Class} to transform
+   * @return a simplified {@link Class} representation
    */
-  private Class<?> toWrapper(@NonNull Class<?> possiblyPrimitive) {
-    if (!possiblyPrimitive.isPrimitive()) {
-      return possiblyPrimitive;
+  private Class<?> simplifyType(@NonNull Class<?> toSimplify) {
+    Class<?> wrapper = wrapperMap.getOrDefault(toSimplify, toSimplify);
+    if (!simplifyMap.containsKey(wrapper)) {
+      return wrapper;
     }
-    return wrapperMap.get(possiblyPrimitive);
+    return simplifyMap.get(wrapper);
   }
 
   /**
