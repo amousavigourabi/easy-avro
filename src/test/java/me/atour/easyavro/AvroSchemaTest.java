@@ -148,8 +148,18 @@ class AvroSchemaTest {
     Schema expected = SchemaBuilder.record("SchemaTest_ArrayTypeDto")
         .namespace("me.atour.easyavro")
         .fields()
-        .name("intArrayTwo").type().array().items().intType().noDefault()
-        .name("intArrayOne").type().array().items().intType().noDefault()
+        .name("intArrayTwo")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
+        .name("intArrayOne")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
         .endRecord();
     assertThat(schema.getSchema()).isEqualTo(expected);
   }
