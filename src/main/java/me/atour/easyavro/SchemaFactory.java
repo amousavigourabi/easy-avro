@@ -152,6 +152,8 @@ public class SchemaFactory {
       AvroSchema<?> schema = new AvroSchema<>(wrappedType);
       schema.generate();
       builder = builder.name(fieldName).type(schema.getSchema()).noDefault();
+    }
+  }
 
   /**
    * Adds an array field to the {@link Schema} the factory is building.
