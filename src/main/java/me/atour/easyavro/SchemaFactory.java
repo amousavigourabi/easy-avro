@@ -87,7 +87,9 @@ public class SchemaFactory {
    * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
    */
   private void setField(Class<?> fieldType, String fieldName, boolean isRequired) {
-    if (isRequired) {
+    if (fieldType.isArray()) {
+      setArrayField(fieldType.getComponentType(), fieldName);
+    } else if (isRequired) {
       setRequiredField(fieldType, fieldName);
     } else {
       setOptionalField(fieldType, fieldName);
@@ -150,6 +152,32 @@ public class SchemaFactory {
       AvroSchema<?> schema = new AvroSchema<>(wrappedType);
       schema.generate();
       builder = builder.name(fieldName).type(schema.getSchema()).noDefault();
+
+  /**
+   * Adds an array field to the {@link Schema} the factory is building.
+   *
+   * @param fieldType the component type of the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
+   */
+  private void setArrayField(Class<?> fieldType, String fieldName) {
+    Class<?> wrappedType = simplifyType(fieldType);
+    if (Boolean.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().booleanType().noDefault();
+    } else if (Long.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().longType().noDefault();
+    } else if (Integer.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().intType().noDefault();
+    } else if (Double.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().doubleType().noDefault();
+    } else if (Float.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().floatType().noDefault();
+    } else if (String.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().array().items().stringType().noDefault();
+    } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
+      AvroSchema<?> schema = new AvroSchema<>(wrappedType);
+      schema.generate();
+      builder = builder.name(fieldName).type().array().items().type(schema.getSchema()).noDefault();
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
