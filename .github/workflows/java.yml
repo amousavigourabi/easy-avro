@@ -8,9 +8,11 @@ on:
 
 jobs:
   build:
-    matrix:
-      java: ['11', '17']
-      os: [windows-latest, ubuntu-latest]
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['11', '17']
+        os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
