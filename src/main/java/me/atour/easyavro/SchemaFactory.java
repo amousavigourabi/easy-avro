@@ -151,7 +151,10 @@ public class SchemaFactory {
     } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
       AvroSchema<?> schema = new AvroSchema<>(wrappedType);
       schema.generate();
-      builder = builder.name(fieldName).type(schema.getSchema()).noDefault();
+      builder = builder.name(fieldName).type().optional().type(schema.getSchema());
+    } else {
+      log.error("Cannot create a valid encoding for {}.", fieldType);
+      throw new CannotCreateValidEncodingException();
     }
   }
 
