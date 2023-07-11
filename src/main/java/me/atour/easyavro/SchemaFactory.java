@@ -164,10 +164,7 @@ public class SchemaFactory {
    * @return a simplified {@link Class} representation
    */
   private Class<?> simplifyType(@NonNull Class<?> toSimplify) {
-    if (!wrapperMap.containsKey(toSimplify)) {
-      return toSimplify;
-    }
-    Class<?> wrapper = wrapperMap.get(toSimplify);
+    Class<?> wrapper = wrapperMap.getOrDefault(toSimplify, toSimplify);
     if (!simplifyMap.containsKey(wrapper)) {
       return wrapper;
     }
