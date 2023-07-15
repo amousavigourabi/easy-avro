@@ -2,6 +2,8 @@ package me.atour.easyavro;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -75,6 +77,42 @@ class AvroSchemaTest {
     private final Character[] charArray;
     private final boolean[] boolArray;
     private final Long[] longArray;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class ListDto {
+    private final List<String> stringList;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class MultipleListTypeDto {
+    private final List<Integer> intList;
+    private final List<Double> doubleList;
+    private final List<Float> floatList;
+    private final List<String> stringList;
+    private final List<Character> charList;
+    private final List<Boolean> boolList;
+    private final List<Long> longList;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class MapDto {
+    private final Map<String, Long> longMap;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class MultipleMapTypeDto {
+    private final Map<String, Integer> intMap;
+    private final Map<String, Double> doubleMap;
+    private final Map<String, Float> floatMap;
+    private final Map<String, String> stringMap;
+    private final Map<String, Character> charMap;
+    private final Map<String, Boolean> boolMap;
+    private final Map<String, Long> longMap;
   }
 
   @Test
@@ -223,6 +261,146 @@ class AvroSchemaTest {
         .type()
         .array()
         .items()
+        .stringType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaWithOneList() {
+    AvroSchema<ListDto> schema = new AvroSchema<>(ListDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_ListDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("stringList")
+        .type()
+        .array()
+        .items()
+        .stringType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaContainingMultipleListTypes() {
+    AvroSchema<MultipleListTypeDto> schema = new AvroSchema<>(MultipleListTypeDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_MultipleListTypeDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("intList")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
+        .name("stringList")
+        .type()
+        .array()
+        .items()
+        .stringType()
+        .noDefault()
+        .name("floatList")
+        .type()
+        .array()
+        .items()
+        .floatType()
+        .noDefault()
+        .name("charList")
+        .type()
+        .array()
+        .items()
+        .intType()
+        .noDefault()
+        .name("doubleList")
+        .type()
+        .array()
+        .items()
+        .doubleType()
+        .noDefault()
+        .name("boolList")
+        .type()
+        .array()
+        .items()
+        .booleanType()
+        .noDefault()
+        .name("longList")
+        .type()
+        .array()
+        .items()
+        .longType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaWithOneMap() {
+    AvroSchema<MapDto> schema = new AvroSchema<>(MapDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_MapDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("longMap")
+        .type()
+        .map()
+        .values()
+        .longType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaContainingMultipleMapTypes() {
+    AvroSchema<MultipleMapTypeDto> schema = new AvroSchema<>(MultipleMapTypeDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_MultipleMapTypeDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("charMap")
+        .type()
+        .map()
+        .values()
+        .intType()
+        .noDefault()
+        .name("doubleMap")
+        .type()
+        .map()
+        .values()
+        .doubleType()
+        .noDefault()
+        .name("boolMap")
+        .type()
+        .map()
+        .values()
+        .booleanType()
+        .noDefault()
+        .name("longMap")
+        .type()
+        .map()
+        .values()
+        .longType()
+        .noDefault()
+        .name("floatMap")
+        .type()
+        .map()
+        .values()
+        .floatType()
+        .noDefault()
+        .name("intMap")
+        .type()
+        .map()
+        .values()
+        .intType()
+        .noDefault()
+        .name("stringMap")
+        .type()
+        .map()
+        .values()
         .stringType()
         .noDefault()
         .endRecord();
