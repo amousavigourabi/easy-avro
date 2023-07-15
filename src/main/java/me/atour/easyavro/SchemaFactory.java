@@ -198,19 +198,19 @@ public class SchemaFactory {
     Class<?> wrappedType = simplifyType(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder =
-          builder.name(fieldName).type().array().items().booleanType().noDefault();
+          builder.name(fieldName).type().array().items().booleanType().arrayDefault(List.of());
     } else if (Long.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().array().items().longType().noDefault();
+      builder = builder.name(fieldName).type().array().items().longType().arrayDefault(List.of());
     } else if (Integer.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().array().items().intType().noDefault();
+      builder = builder.name(fieldName).type().array().items().intType().arrayDefault(List.of());
     } else if (Double.class.isAssignableFrom(wrappedType)) {
       builder =
-          builder.name(fieldName).type().array().items().doubleType().noDefault();
+          builder.name(fieldName).type().array().items().doubleType().arrayDefault(List.of());
     } else if (Float.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().array().items().floatType().noDefault();
+      builder = builder.name(fieldName).type().array().items().floatType().arrayDefault(List.of());
     } else if (String.class.isAssignableFrom(wrappedType)) {
       builder =
-          builder.name(fieldName).type().array().items().stringType().noDefault();
+          builder.name(fieldName).type().array().items().stringType().arrayDefault(List.of());
     } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
       AvroSchema<?> schema = new AvroSchema<>(wrappedType);
       schema.generate();
@@ -219,7 +219,7 @@ public class SchemaFactory {
           .array()
           .items()
           .type(schema.getSchema())
-          .noDefault();
+          .arrayDefault(List.of());
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
@@ -237,17 +237,17 @@ public class SchemaFactory {
     Class<?> wrappedType = simplifyType(fieldType);
     if (Boolean.class.isAssignableFrom(wrappedType)) {
       builder =
-          builder.name(fieldName).type().map().values().booleanType().noDefault();
+          builder.name(fieldName).type().map().values().booleanType().mapDefault(Map.of());
     } else if (Long.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().map().values().longType().noDefault();
+      builder = builder.name(fieldName).type().map().values().longType().mapDefault(Map.of());
     } else if (Integer.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().map().values().intType().noDefault();
+      builder = builder.name(fieldName).type().map().values().intType().mapDefault(Map.of());
     } else if (Double.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().map().values().doubleType().noDefault();
+      builder = builder.name(fieldName).type().map().values().doubleType().mapDefault(Map.of());
     } else if (Float.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().map().values().floatType().noDefault();
+      builder = builder.name(fieldName).type().map().values().floatType().mapDefault(Map.of());
     } else if (String.class.isAssignableFrom(wrappedType)) {
-      builder = builder.name(fieldName).type().map().values().stringType().noDefault();
+      builder = builder.name(fieldName).type().map().values().stringType().mapDefault(Map.of());
     } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
       AvroSchema<?> schema = new AvroSchema<>(wrappedType);
       schema.generate();
@@ -256,7 +256,7 @@ public class SchemaFactory {
           .map()
           .values()
           .type(schema.getSchema())
-          .noDefault();
+          .mapDefault(Map.of());
     } else {
       log.error("Cannot create a valid encoding for {}.", fieldType);
       throw new CannotCreateValidEncodingException();
