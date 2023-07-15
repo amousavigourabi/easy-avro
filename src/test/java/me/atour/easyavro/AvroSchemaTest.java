@@ -2,6 +2,8 @@ package me.atour.easyavro;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -75,6 +77,18 @@ class AvroSchemaTest {
     private final Character[] charArray;
     private final boolean[] boolArray;
     private final Long[] longArray;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class ListDto {
+    private final List<String> stringList;
+  }
+
+  @SuppressWarnings("unused")
+  @RequiredArgsConstructor
+  private static class MapDto {
+    private final Map<String, Long> longMap;
   }
 
   @Test
@@ -224,6 +238,40 @@ class AvroSchemaTest {
         .array()
         .items()
         .stringType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaWithOneList() {
+    AvroSchema<ListDto> schema = new AvroSchema<>(ListDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_ListDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("stringList")
+        .type()
+        .array()
+        .items()
+        .stringType()
+        .noDefault()
+        .endRecord();
+    assertThat(schema.getSchema()).isEqualTo(expected);
+  }
+
+  @Test
+  public void generateSchemaWithOneMap() {
+    AvroSchema<MapDto> schema = new AvroSchema<>(MapDto.class);
+    schema.generate();
+    Schema expected = SchemaBuilder.record("SchemaTest_MapDto")
+        .namespace("me.atour.easyavro")
+        .fields()
+        .name("longMap")
+        .type()
+        .map()
+        .values()
+        .longType()
         .noDefault()
         .endRecord();
     assertThat(schema.getSchema()).isEqualTo(expected);

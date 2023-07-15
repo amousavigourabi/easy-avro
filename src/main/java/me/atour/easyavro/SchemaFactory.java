@@ -2,10 +2,12 @@ package me.atour.easyavro;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -69,10 +71,16 @@ public class SchemaFactory {
       } else {
         processedFieldName = fieldAnnotation.name();
       }
-      VarHandle typeInfoHandle = lookup.unreflectVarHandle(field.getKey());
-      Class<?> fieldType = typeInfoHandle.varType();
-      boolean isFinal = Modifier.isFinal(field.getKey().getModifiers());
-      setField(fieldType, processedFieldName, isFinal);
+      Class<?> fieldType = field.getKey().getType();
+      if (List.class.isAssignableFrom(fieldType) || Map.class.isAssignableFrom(fieldType)) {
+        Type genericType = field.getKey().getGenericType();
+        assert genericType instanceof ParameterizedType;
+        ParameterizedType parameterizedType = (ParameterizedType) genericType;
+        setField(fieldType, processedFieldName, parameterizedType.getActualTypeArguments());
+      } else {
+        boolean isFinal = Modifier.isFinal(field.getKey().getModifiers());
+        setField(fieldType, processedFieldName, isFinal);
+      }
       fieldNames.put(originalFieldName, processedFieldName);
     }
     return fieldNames;
@@ -93,6 +101,27 @@ public class SchemaFactory {
       setRequiredField(fieldType, fieldName);
     } else {
       setOptionalField(fieldType, fieldName);
+    }
+  }
+
+  /**
+   * Adds a field to the {@link Schema} the factory is building.
+   *
+   * @param fieldType the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @param typeParameters the field type's type parameters
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
+   */
+  private void setField(Class<?> fieldType, String fieldName, Type[] typeParameters) {
+    if (List.class.isAssignableFrom(fieldType)) {
+      Class<?> listType = (Class<?>) typeParameters[0];
+      setArrayField(listType, fieldName);
+    } else if (Map.class.isAssignableFrom(fieldType)) {
+      Class<?> mapType = (Class<?>) typeParameters[1];
+      setMapField(mapType, fieldName);
+    } else {
+      log.error("Expected Map or List assignable type, got {} instead.", fieldType);
+      throw new RuntimeException();
     }
   }
 
@@ -189,6 +218,43 @@ public class SchemaFactory {
           .type()
           .array()
           .items()
+          .type(schema.getSchema())
+          .noDefault();
+    } else {
+      log.error("Cannot create a valid encoding for {}.", fieldType);
+      throw new CannotCreateValidEncodingException();
+    }
+  }
+
+  /**
+   * Adds a map field to the {@link Schema} the factory is building.
+   *
+   * @param fieldType the component type of the field type as a Java {@link Class}
+   * @param fieldName the field name
+   * @throws CannotCreateValidEncodingException when the {@link Class} cannot be encoded
+   */
+  private void setMapField(Class<?> fieldType, String fieldName) {
+    Class<?> wrappedType = simplifyType(fieldType);
+    if (Boolean.class.isAssignableFrom(wrappedType)) {
+      builder =
+          builder.name(fieldName).type().map().values().booleanType().noDefault();
+    } else if (Long.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().map().values().longType().noDefault();
+    } else if (Integer.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().map().values().intType().noDefault();
+    } else if (Double.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().map().values().doubleType().noDefault();
+    } else if (Float.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().map().values().floatType().noDefault();
+    } else if (String.class.isAssignableFrom(wrappedType)) {
+      builder = builder.name(fieldName).type().map().values().stringType().noDefault();
+    } else if (wrappedType.isAnnotationPresent(AvroRecord.class)) {
+      AvroSchema<?> schema = new AvroSchema<>(wrappedType);
+      schema.generate();
+      builder = builder.name(fieldName)
+          .type()
+          .map()
+          .values()
           .type(schema.getSchema())
           .noDefault();
     } else {
