@@ -15,5 +15,5 @@ public @interface AvroRecord {
 
   String schemaName() default "";
 
-  FieldNamingStrategies fieldStrategy() default FieldNamingStrategies.DROMEDARY_CASE;
+  FieldNamingStrategies fieldStrategy() default FieldNamingStrategies.SNAKE_CASE;
 }

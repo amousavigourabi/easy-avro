@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.atour.easyavro.field.DromedaryCaseNamingConverter;
 import me.atour.easyavro.field.FieldNamingConverter;
+import me.atour.easyavro.field.SnakeCaseNamingConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -52,7 +52,7 @@ public class AvroSchema<T> {
     FieldNamingConverter fieldNameConverter;
     String schemaName;
     if (namingAnnotation == null) {
-      fieldNameConverter = new DromedaryCaseNamingConverter();
+      fieldNameConverter = new SnakeCaseNamingConverter();
       schemaName = clazz.getName().replace('$', '_');
       schemaName = schemaName.substring(schemaName.lastIndexOf('.') + 1);
     } else {
