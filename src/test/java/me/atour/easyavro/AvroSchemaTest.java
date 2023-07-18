@@ -36,6 +36,7 @@ class AvroSchemaTest {
   }
 
   @SuppressWarnings("unused")
+  @EqualsAndHashCode
   @RequiredArgsConstructor
   private static class MultipleTypesDto {
     private final Boolean boolOne;
@@ -45,6 +46,20 @@ class AvroSchemaTest {
     private final Byte byteOne;
     private final double doubleOne;
     private final Float floatOne;
+    private final short shortOne;
+  }
+
+  @SuppressWarnings("unused")
+  @EqualsAndHashCode
+  @RequiredArgsConstructor
+  private static class MultiplePrimitiveTypesDto {
+    private final boolean boolOne;
+    private final char charOne;
+    private final int intOne;
+    private final long longOne;
+    private final byte byteOne;
+    private final double doubleOne;
+    private final float floatOne;
     private final short shortOne;
   }
 
@@ -445,7 +460,28 @@ class AvroSchemaTest {
   }
 
   @Test
-  public void generatePojoFromRecord() {
+  public void generatePojoFromRecordWithMultiplePrimitivesAndWrappers() {
+    AvroSchema<MultipleTypesDto> schema = new AvroSchema<>(MultipleTypesDto.class);
+    schema.generate();
+    MultipleTypesDto dto = new MultipleTypesDto(false, 'a', 1, 2L, (byte) 3, 1.0, -0.7f, (short) 8);
+    GenericRecord actual = schema.convertFromPojo(dto);
+    MultipleTypesDto pojo = schema.convertToPojo(actual);
+    assertThat(pojo).isEqualTo(dto);
+  }
+
+  @Test
+  public void generatePojoFromRecordWithMultiplePrimitives() {
+    AvroSchema<MultiplePrimitiveTypesDto> schema = new AvroSchema<>(MultiplePrimitiveTypesDto.class);
+    schema.generate();
+    MultiplePrimitiveTypesDto dto =
+        new MultiplePrimitiveTypesDto(true, 'z', 81, -29191L, (byte) -10, 0.0001, 6.74f, (short) 0);
+    GenericRecord actual = schema.convertFromPojo(dto);
+    MultiplePrimitiveTypesDto pojo = schema.convertToPojo(actual);
+    assertThat(pojo).isEqualTo(dto);
+  }
+
+  @Test
+  public void generatePojoFromRecordWithArrays() {
     AvroSchema<ArrayTypeDto> schema = new AvroSchema<>(ArrayTypeDto.class);
     schema.generate();
     ArrayTypeDto dto = new ArrayTypeDto(new int[] {1, 2}, new Integer[] {1, 2});
