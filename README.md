@@ -121,3 +121,11 @@ that the `Unsafe` will have to be available to the runtime environment for Easy 
 For logging, SLF4J is used. Easy Avro does not provide an implementation, this means that it will use the no-op
 logger implementation by default. If an implementation is used by the project that uses Easy Avro, Easy Avro will
 use that logger instead.
+
+## Contribute
+
+If you want to contribute code to the repository, please fork it and submit a pull request explaining the
+contribution, linking to an issue whenever possible. Please do not forget to include tests.
+
+To ensure a consistent codebase, Checkstyle, Spotless, and PMD are used. To run both these linters and the test
+suite, you can run the Maven verify lifecycle phase.
