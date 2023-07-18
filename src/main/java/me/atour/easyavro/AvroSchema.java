@@ -26,11 +26,23 @@ import org.apache.avro.generic.GenericRecord;
 @RequiredArgsConstructor
 public class AvroSchema<T> {
 
+  private static final sun.misc.Unsafe unsafe;
+
   private final Class<T> clazz;
   private final Map<String, String> schemaFields = new ConcurrentHashMap<>();
 
   @Getter
   private Schema schema;
+
+  static {
+    try {
+      Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+      unsafeField.setAccessible(true);
+      unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+    } catch (ReflectiveOperationException e) {
+      throw new DoesNotSupportUnsafeException();
+    }
+  }
 
   /**
    * Generates the schema belonging to the {@link Class} this {@link AvroSchema} was instantiated with.
@@ -103,40 +115,45 @@ public class AvroSchema<T> {
    */
   public T convertToPojo(GenericRecord record) {
     try {
-      Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-      unsafeField.setAccessible(true);
-      sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
-
       T instance = (T) unsafe.allocateInstance(clazz);
-
       for (Map.Entry<String, String> field : schemaFields.entrySet()) {
         Field valueField = clazz.getDeclaredField(field.getKey());
-        long offset = unsafe.objectFieldOffset(valueField);
-        Class<?> valueType = valueField.getType();
-        if (!valueType.isPrimitive()) {
-          unsafe.putObject(instance, offset, record.get(field.getValue()));
-        } else if (valueType.equals(double.class)) {
-          unsafe.putDouble(instance, offset, (Double) record.get(field.getValue()));
-        } else if (valueType.equals(int.class)) {
-          unsafe.putInt(instance, offset, (Integer) record.get(field.getValue()));
-        } else if (valueType.equals(float.class)) {
-          unsafe.putFloat(instance, offset, (Float) record.get(field.getValue()));
-        } else if (valueType.equals(boolean.class)) {
-          unsafe.putBoolean(instance, offset, (Boolean) record.get(field.getValue()));
-        } else if (valueType.equals(byte.class)) {
-          unsafe.putByte(instance, offset, (Byte) record.get(field.getValue()));
-        } else if (valueType.equals(short.class)) {
-          unsafe.putShort(instance, offset, (Short) record.get(field.getValue()));
-        } else if (valueType.equals(long.class)) {
-          unsafe.putLong(instance, offset, (Long) record.get(field.getValue()));
-        } else if (valueType.equals(char.class)) {
-          unsafe.putChar(instance, offset, (Character) record.get(field.getValue()));
-        }
+        setField(instance, valueField, record.get(field.getValue()));
       }
-
       return instance;
     } catch (NoSuchElementException | ReflectiveOperationException e) {
       throw new CannotConvertRecordToPojoException(e);
+    }
+  }
+
+  /**
+   * Sets a field in the given object instance.
+   *
+   * @param instance the instance to modify
+   * @param field the {@link Field} to set
+   * @param value the value to set the instance field to
+   */
+  public void setField(Object instance, Field field, Object value) {
+    long offset = unsafe.objectFieldOffset(field);
+    Class<?> valueType = field.getType();
+    if (!valueType.isPrimitive()) {
+      unsafe.putObject(instance, offset, value);
+    } else if (valueType.equals(double.class)) {
+      unsafe.putDouble(instance, offset, (Double) value);
+    } else if (valueType.equals(int.class)) {
+      unsafe.putInt(instance, offset, (Integer) value);
+    } else if (valueType.equals(float.class)) {
+      unsafe.putFloat(instance, offset, (Float) value);
+    } else if (valueType.equals(boolean.class)) {
+      unsafe.putBoolean(instance, offset, (Boolean) value);
+    } else if (valueType.equals(byte.class)) {
+      unsafe.putByte(instance, offset, (Byte) value);
+    } else if (valueType.equals(short.class)) {
+      unsafe.putShort(instance, offset, (Short) value);
+    } else if (valueType.equals(long.class)) {
+      unsafe.putLong(instance, offset, (Long) value);
+    } else if (valueType.equals(char.class)) {
+      unsafe.putChar(instance, offset, (Character) value);
     }
   }
 }
