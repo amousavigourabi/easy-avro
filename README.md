@@ -124,8 +124,9 @@ use that logger instead.
 
 ## Contribute
 
-If you want to contribute code to the repository, please fork it and submit a pull request explaining the
+If you want to contribute code to the project, please fork the repository and submit a pull request explaining the
 contribution, linking to an issue whenever possible. Please do not forget to include tests.
 
 To ensure a consistent codebase, Checkstyle, Spotless, and PMD are used. To run both these linters and the test
-suite, you can run the Maven verify lifecycle phase.
+suite, you can run the Maven verify lifecycle phase as `mvn clean verify`. To apply the suggestions from Spotless,
+you can run the `apply` goal Spotless provides as `mvn spotless:apply`.
