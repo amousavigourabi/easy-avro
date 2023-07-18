@@ -111,7 +111,27 @@ public class AvroSchema<T> {
 
       for (Map.Entry<String, String> field : schemaFields.entrySet()) {
         Field valueField = clazz.getDeclaredField(field.getKey());
-        unsafe.putObject(instance, unsafe.objectFieldOffset(valueField), record.get(field.getValue()));
+        long offset = unsafe.objectFieldOffset(valueField);
+        Class<?> valueType = valueField.getType();
+        if (!valueType.isPrimitive()) {
+          unsafe.putObject(instance, offset, record.get(field.getValue()));
+        } else if (valueType.equals(double.class)) {
+          unsafe.putDouble(instance, offset, (Double) record.get(field.getValue()));
+        } else if (valueType.equals(int.class)) {
+          unsafe.putInt(instance, offset, (Integer) record.get(field.getValue()));
+        } else if (valueType.equals(float.class)) {
+          unsafe.putFloat(instance, offset, (Float) record.get(field.getValue()));
+        } else if (valueType.equals(boolean.class)) {
+          unsafe.putBoolean(instance, offset, (Boolean) record.get(field.getValue()));
+        } else if (valueType.equals(byte.class)) {
+          unsafe.putByte(instance, offset, (Byte) record.get(field.getValue()));
+        } else if (valueType.equals(short.class)) {
+          unsafe.putShort(instance, offset, (Short) record.get(field.getValue()));
+        } else if (valueType.equals(long.class)) {
+          unsafe.putLong(instance, offset, (Long) record.get(field.getValue()));
+        } else if (valueType.equals(char.class)) {
+          unsafe.putChar(instance, offset, (Character) record.get(field.getValue()));
+        }
       }
 
       return instance;

@@ -36,6 +36,7 @@ class AvroSchemaTest {
   }
 
   @SuppressWarnings("unused")
+  @EqualsAndHashCode
   @RequiredArgsConstructor
   private static class MultipleTypesDto {
     private final Boolean boolOne;
@@ -445,7 +446,17 @@ class AvroSchemaTest {
   }
 
   @Test
-  public void generatePojoFromRecord() {
+  public void generatePojoFromRecordWithMultiplePrimitivesAndWrappers() {
+    AvroSchema<MultipleTypesDto> schema = new AvroSchema<>(MultipleTypesDto.class);
+    schema.generate();
+    MultipleTypesDto dto = new MultipleTypesDto(false, 'a', 1, 2L, (byte) 3, 1.0, -0.7f, (short) 8);
+    GenericRecord actual = schema.convertFromPojo(dto);
+    MultipleTypesDto pojo = schema.convertToPojo(actual);
+    assertThat(pojo).isEqualTo(dto);
+  }
+
+  @Test
+  public void generatePojoFromRecordWithArrays() {
     AvroSchema<ArrayTypeDto> schema = new AvroSchema<>(ArrayTypeDto.class);
     schema.generate();
     ArrayTypeDto dto = new ArrayTypeDto(new int[] {1, 2}, new Integer[] {1, 2});
