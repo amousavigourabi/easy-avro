@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -61,6 +62,7 @@ class AvroSchemaTest {
   }
 
   @SuppressWarnings("unused")
+  @EqualsAndHashCode
   @RequiredArgsConstructor
   private static class ArrayTypeDto {
     private final int[] intArrayOne;
@@ -440,5 +442,15 @@ class AvroSchemaTest {
     assertThat(actualArrayOne[1]).isEqualTo(2);
     assertThat(actualArrayTwo[0]).isEqualTo(1);
     assertThat(actualArrayTwo[1]).isEqualTo(2);
+  }
+
+  @Test
+  public void generatePojoFromRecord() {
+    AvroSchema<ArrayTypeDto> schema = new AvroSchema<>(ArrayTypeDto.class);
+    schema.generate();
+    ArrayTypeDto dto = new ArrayTypeDto(new int[] {1, 2}, new Integer[] {1, 2});
+    GenericRecord actual = schema.convertFromPojo(dto);
+    ArrayTypeDto pojo = schema.convertToPojo(actual);
+    assertThat(pojo).isEqualTo(dto);
   }
 }

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -92,5 +93,30 @@ public class AvroSchema<T> {
       log.error("Could not convert to Avro record {}.", e.getMessage());
     }
     return record;
+  }
+
+  /**
+   * Convert a {@link GenericRecord} to the POJO it represents.
+   *
+   * @param record the {@link GenericRecord} to convert
+   * @return the respective POJO
+   */
+  public T convertToPojo(GenericRecord record) {
+    try {
+      Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+      unsafeField.setAccessible(true);
+      sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+
+      T instance = (T) unsafe.allocateInstance(clazz);
+
+      for (Map.Entry<String, String> field : schemaFields.entrySet()) {
+        Field valueField = clazz.getDeclaredField(field.getKey());
+        unsafe.putObject(instance, unsafe.objectFieldOffset(valueField), record.get(field.getValue()));
+      }
+
+      return instance;
+    } catch (NoSuchElementException | ReflectiveOperationException e) {
+      throw new CannotConvertRecordToPojoException(e);
+    }
   }
 }
