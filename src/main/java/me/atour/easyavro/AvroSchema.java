@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.atour.easyavro.field.FieldNamingConverter;
 import me.atour.easyavro.field.SnakeCaseNamingConverter;
@@ -23,13 +22,13 @@ import org.apache.avro.generic.GenericRecord;
  * @param <T> type parameter representing the class the POJOs belong to and the {@link Schema} is generated for.
  */
 @Slf4j
-@RequiredArgsConstructor
 public class AvroSchema<T> {
 
   private static final sun.misc.Unsafe unsafe;
 
   private final Class<T> clazz;
-  private final Map<String, String> schemaFields = new ConcurrentHashMap<>();
+  private final MethodHandles.Lookup lookup;
+  private final Map<String, String> schemaFields;
 
   @Getter
   private Schema schema;
@@ -41,6 +40,21 @@ public class AvroSchema<T> {
       unsafe = (sun.misc.Unsafe) unsafeField.get(null);
     } catch (ReflectiveOperationException e) {
       throw new DoesNotSupportUnsafeException();
+    }
+  }
+
+  /**
+   * Construct an {@link AvroSchema} for a class.
+   *
+   * @param tClass the {@link Class} for which to generate an Avro schema.
+   */
+  public AvroSchema(Class<T> tClass) {
+    try {
+      clazz = tClass;
+      lookup = MethodHandles.privateLookupIn(tClass, MethodHandles.lookup());
+      schemaFields = new ConcurrentHashMap<>();
+    } catch (IllegalAccessException ignored) {
+      throw new CannotAccessPojoException();
     }
   }
 
@@ -64,7 +78,6 @@ public class AvroSchema<T> {
     }
     try {
       Map<Field, MethodHandle> fieldHandles = new HashMap<>();
-      MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
       for (Field field : clazz.getDeclaredFields()) {
         if (Modifier.isStatic(field.getModifiers())) {
           continue;
@@ -94,7 +107,6 @@ public class AvroSchema<T> {
     GenericData.Record record = new GenericData.Record(schema);
     try {
       for (Field field : fields) {
-        MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup());
         MethodHandle handle = lookup.unreflectGetter(field);
         if (!Modifier.isStatic(field.getModifiers())
             && schemaFields.containsKey(lookup.revealDirect(handle).getName())) {
