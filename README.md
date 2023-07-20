@@ -114,7 +114,7 @@ dependency in your projects.
 ```
 
 It is important to note that the `sun.misc.Unsafe` class is used to convert Avro records to POJOs. This means
-that the `Unsafe` will have to be available to the runtime environment for Easy Avro to function properly.
+that `Unsafe` will have to be available to the runtime environment for Easy Avro to function properly.
 
 ## Logging
 
