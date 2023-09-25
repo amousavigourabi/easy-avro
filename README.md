@@ -107,7 +107,7 @@ dependency in your projects.
 
 ```xml
 <dependency>
-  <groupId>me.atour</groupId>
+  <groupId>me.atour.easy-avro</groupId>
   <artifactId>easy-avro</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 </dependency>
