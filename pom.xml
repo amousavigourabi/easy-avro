@@ -18,7 +18,7 @@
     <checkstyle.version>3.3.0</checkstyle.version>
     <enforcer.version>3.6.2</enforcer.version>
     <failsafe.version>3.1.2</failsafe.version>
-    <jacoco.version>0.8.10</jacoco.version>
+    <jacoco.version>0.8.14</jacoco.version>
     <junit.jupiter.version>5.10.0-RC1</junit.jupiter.version>
     <mockito.version>5.21.0</mockito.version>
     <pitest.junit.version>1.2.0</pitest.junit.version>
