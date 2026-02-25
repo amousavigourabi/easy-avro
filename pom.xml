@@ -18,7 +18,7 @@
 
     <checkstyle.version>3.6.0</checkstyle.version>
     <enforcer.version>3.6.2</enforcer.version>
-    <failsafe.version>3.5.4</failsafe.version>
+    <failsafe.version>3.5.5</failsafe.version>
     <jacoco.version>0.8.14</jacoco.version>
     <junit.jupiter.version>6.1.0-M1</junit.jupiter.version>
     <lombok.version>1.18.42</lombok.version>
