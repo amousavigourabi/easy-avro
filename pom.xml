@@ -28,7 +28,7 @@
     <pmd.version>3.28.0</pmd.version>
     <shade.version>3.5.0</shade.version>
     <spotless.version>3.2.1</spotless.version>
-    <surefire.version>3.1.2</surefire.version>
+    <surefire.version>3.5.5</surefire.version>
   </properties>
 
   <dependencies>
