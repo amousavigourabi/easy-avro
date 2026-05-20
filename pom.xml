@@ -17,17 +17,17 @@
     <maven.version>3.6.0</maven.version>
 
     <checkstyle.version>3.6.0</checkstyle.version>
-    <enforcer.version>3.6.2</enforcer.version>
+    <enforcer.version>3.6.3</enforcer.version>
     <failsafe.version>3.5.5</failsafe.version>
     <jacoco.version>0.8.14</jacoco.version>
     <junit.jupiter.version>6.1.0-M1</junit.jupiter.version>
     <lombok.version>1.18.46</lombok.version>
     <mockito.version>5.23.0</mockito.version>
     <pitest.junit.version>1.2.3</pitest.junit.version>
-    <pitest.version>1.23.1</pitest.version>
+    <pitest.version>1.24.1</pitest.version>
     <pmd.version>3.28.0</pmd.version>
     <shade.version>3.6.2</shade.version>
-    <spotless.version>3.4.0</spotless.version>
+    <spotless.version>3.5.1</spotless.version>
     <surefire.version>3.5.5</surefire.version>
   </properties>
 
